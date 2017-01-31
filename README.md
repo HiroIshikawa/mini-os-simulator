@@ -169,14 +169,15 @@ c. Process/Resource Manager:
 - request / time-out
 - destroy
 
+
+### Time-out
+
 	Scheduler() {
 		find highest priority process p
 		if (self->priority < p->priority ||  self->Status.Type != 'running' || self == NIL)  
 			premep(p, self)  # print the new running process p here
 	}
-
-### Time-out
-
+	
 	Time_out() {
 		find running process p
 		remove(RL, p)
