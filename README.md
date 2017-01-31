@@ -163,7 +163,6 @@ c. Process/Resource Manager:
 	- if happens, the process will be placed in the tail
 - Init process serves two purposes: dummy process: lowerst priority, never blocked -root of process creation tree
 
-Code:
 	Scheduler() {
 		find highest priority process p
 		if (self->priority < p->priority ||  # create / release
