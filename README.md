@@ -162,6 +162,9 @@ c. Process/Resource Manager:
 - Time sharing is simulated by a function call
 	- if happens, the process will be placed in the tail
 - Init process serves two purposes: dummy process: lowerst priority, never blocked -root of process creation tree
+- Preemption
+	- Change status of p to running (status of self already changed to ready/blocked)
+	- Context switch - output of nmae of running process
 
 	Scheduler() {
 		find highest priority process p
@@ -170,11 +173,6 @@ c. Process/Resource Manager:
 		self == NIL)  # NIL
 			premep(p, self)  # print the new running process p here
 	}
-
-
-- Preemption
-	- Change status of p to running (status of self already changed to ready/blocked)
-	- Context switch - output of nmae of running process
 
 ### Time-out
 
