@@ -84,6 +84,7 @@ c. Process/Resource Manager:
 		link PCB to creation tree
 		insert(RL, PCB)
 		scheduler()
+	}
 
 - Init process is created at start-up & can create first system or user process
 - Any new or released process is inserted at the end of the queue (RL)
@@ -103,3 +104,5 @@ c. Process/Resource Manager:
 	}
 
 - Process can be destroyed by any of its ancesters or by itself (exit)
+
+### 
