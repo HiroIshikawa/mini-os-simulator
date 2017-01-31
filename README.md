@@ -1,6 +1,6 @@
 # mini-os-simulator
 
-## Process and Resource Manager
+## 1. Process and Resource Manager
 ### Functionality:
 - process : create / destroy; datastructure: PCB
 - resource : request / release
