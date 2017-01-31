@@ -64,7 +64,42 @@ c. Process/Resource Manager:
 
 ### Process Control Block (PCB)
 - PID
-- Other Resources
-- Status : Type & List
-- Creation Tree : Parent/Child
+- Other Resources : Linked List like, pointing to resource control block, which results of requets
+- Status : Type (Running/Ready/Blocked)& List (back pointer to either Ready List (if process running) Blocked List (otherwise))
+- Creation Tree : Parent (pointing to parent PCB)/Child (pointing children)
 - Priority : 1, 2, 3 (Init, User, System)
+
+### Ready List
+- 2 (system), 1 (user), 0 (init)
+- Priorities don't change in a session
+- Every process is either on Ready List or Blocked List
+- When start a session, a process ties to init level to begin
+- Each level of priorities may have any number of processes
+
+### Create
+
+	Create(initialization params) {
+		create PCB data struct
+		initialize PCB using params
+		link PCB to creation tree
+		insert(RL, PCB)
+		scheduler()
+
+- Init process is created at start-up & can create first system or user process
+- Any new or released process is inserted at the end of the queue (RL)
+
+### Destroy
+
+	Destroy (pid) {
+		get pointer p to PCB using pid
+		Kill_Tree(p)
+		Scheduler()
+	}
+
+	Kill_Tree(p) {
+		for all child processes q Kill Tree(q)
+		free resources
+		delete PCb and update all the pointers
+	}
+
+- Process can be destroyed by any of its ancesters or by itself (exit)
