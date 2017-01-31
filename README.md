@@ -169,8 +169,8 @@ c. Process/Resource Manager:
 	Scheduler() {
 		find highest priority process p
 		if (self->priority < p->priority ||  # create / release
-		self->Status.Type != 'running' ||  # request / time-out
-		self == NIL)  # NIL
+			self->Status.Type != 'running' ||  # request / time-out
+			self == NIL)  # NIL
 			premep(p, self)  # print the new running process p here
 	}
 
