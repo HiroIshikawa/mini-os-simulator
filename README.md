@@ -181,3 +181,41 @@ c. Process/Resource Manager:
 		insert(RL, q)
 		Scheduler
 	}
+
+
+
+## 5. Presentation/Shell Script
+### Mandatry Commands
+- init
+- cr <name> <priority>
+	- name: single char
+	- priority: 0, 1, or 2
+- de <name>
+	- name: single char
+- req <resource name> <# of units>
+	- resource name: R1, R2, R3, or R4
+- rel <resource name> <# of units>
+	- resource name: R1, R2, R3, or R4
+- to
+	- 'time-out'
+
+### Optional Commands
+- list all processes and its status
+- list all resources and its status
+- provide information about a given process
+- provide information about a given resource
+
+
+
+## 6. Summary
+### Tasks
+- Design/implement the process and resource manager
+	- data structure and functions
+- Design/implement the driver (shell)
+	- command language and interpreter
+- Instantiate the manager to include at a start-up:
+	- A Ready List with 3 priorities
+	- A single process, Init
+	- 4 resources labeled: R1, R2, R3, R4 (each Ri has i units)
+	- An IO resource
+- Submit program for testing and documentation for evaluation
