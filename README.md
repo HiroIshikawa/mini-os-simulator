@@ -155,7 +155,7 @@ c. Process/Resource Manager:
 
 
 ## 4. Scheduling
-### Outline
+### Specs
 - 3-level priority scheduler 
 - Use preemptive round-robin scheduling within level
 - [Reference to preemtive round-robin scheduling](http://www.read.cs.ucla.edu/111/2007fall/notes/lec7)
@@ -165,19 +165,15 @@ c. Process/Resource Manager:
 - Preemption
 	- Change status of p to running (status of self already changed to ready/blocked)
 	- Context switch - output of nmae of running process
-- create / release 
-- request / time-out
-- destroy
 
-
-### Time-out
+### Implementation
 
 	Scheduler() {
 		find highest priority process p
 		if (self->priority < p->priority ||  self->Status.Type != 'running' || self == NIL)  
 			premep(p, self)  # print the new running process p here
 	}
-	
+
 	Time_out() {
 		find running process p
 		remove(RL, p)
