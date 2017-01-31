@@ -51,6 +51,7 @@ c. Process/Resource Manager:
 ### States and Operations
 - States: Ready, Running, Block
 - Possible Operations:
+
 | Ops       | State From            | State To  |
 | --------- |:---------------------:| ---------:|
 | Create    | (None)                | Ready     |
