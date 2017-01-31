@@ -159,4 +159,30 @@ c. Process/Resource Manager:
 - 3-level priority scheduler 
 - Use preemptive round-robin scheduling within level
 - [Reference to preemtive round-robin scheduling](http://www.read.cs.ucla.edu/111/2007fall/notes/lec7)
-- : 
+- Time sharing is simulated by a function call
+	- if happens, the process will be placed in the tail
+- Init process serves two purposes:
+	- dummy process: lowerst priority, never blocked
+	- root of process creation tree
+
+	Scheduler() {
+		find highest priority process p
+		if (self->priority < p->priority ||  # create / release
+			self->Status.Type != 'running' ||  # request / time-out
+			self == NIL)  # NIL
+			premep(p, self)  # print the new running process p here
+	}
+
+- Preemption
+	- Change status of p to running (status of self already changed to ready/blocked)
+	- Context switch - output of nmae of running process
+
+### Time-out
+
+	Time_out() {
+		find running process p
+		remove(RL, p)
+		q->Status.Type = 'ready'
+		insert(RL, q)
+		Scheduler
+	}
