@@ -28,14 +28,14 @@
 4. Receive response, display response
 
 ### Components:
-A. Interface: 
+a. Interface: 
 	- termianl / test files
-B. Driver:
+b. Driver:
 	- looping for getting command with args (i.e. cr A 1)
 	- invoking command with args
 	- receive response
 	- display response
-C. Process/Resource Manager:
+c. Process/Resource Manager:
 
 ### Shell Example:
 	> cr A 1 
@@ -47,3 +47,23 @@ C. Process/Resource Manager:
 	> req R1, 1 
 	Process B is blocked; process A is running 
 
+## 2. Implementation: Process
+### States and Operations
+- States: Ready, Running, Block
+- Possible Operations:
+| Ops       | State From            | State To  |
+| --------- |:---------------------:| ---------:|
+| Create    | (None)                | Ready     |
+| Destroy   | Running/Ready/Blocked |   (None)  |
+| Request   | Running               | Blocked   |
+| Release   | Blocked               | Ready     |
+| Time_Out  | Running               | Ready     |
+| Scheduler1| Ready                 | Running   |
+| Scheduler2| Running               | Ready     |
+
+### Process Control Block (PCB)
+- PID
+- Other Resources
+- Status : Type & List
+- Creation Tree : Parent/Child
+- Priority : 1, 2, 3 (Init, User, System)
