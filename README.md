@@ -165,15 +165,13 @@ c. Process/Resource Manager:
 	- dummy process: lowerst priority, never blocked
 	- root of process creation tree
 
-
-	Scheduler() {
-		find highest priority process p
-		if (self->priority < p->priority ||  # create / release
-			self->Status.Type != 'running' ||  # request / time-out
-			self == NIL)  # NIL
-			premep(p, self)  # print the new running process p here
-	}
-
+		Scheduler() {
+			find highest priority process p
+			if (self->priority < p->priority ||  # create / release
+				self->Status.Type != 'running' ||  # request / time-out
+				self == NIL)  # NIL
+				premep(p, self)  # print the new running process p here
+		}
 
 - Preemption
 	- Change status of p to running (status of self already changed to ready/blocked)
