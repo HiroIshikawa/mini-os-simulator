@@ -53,7 +53,7 @@ c. Process/Resource Manager:
 - Possible Operations:
 
 | Ops       | State From            | State To  |
-| --------- |:---------------------:| ---------:|
+| :-------: |:---------------------:| :--------:|
 | Create    | (None)                | Ready     |
 | Destroy   | Running/Ready/Blocked |   (None)  |
 | Request   | Running               | Blocked   |
