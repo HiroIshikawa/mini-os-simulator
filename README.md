@@ -219,3 +219,5 @@ c. Process/Resource Manager:
 	- 4 resources labeled: R1, R2, R3, R4 (each Ri has i units)
 	- An IO resource
 - Submit program for testing and documentation for evaluation
+
+[To refer to test examples, watch this video again](http://replay.uci.edu/public/summer2013/Bic-kernel-projE_-_MP4_with_Smart_Player_(Large)_-_20130807_01.20.09AM.html)
