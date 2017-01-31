@@ -38,12 +38,12 @@ B. Driver:
 C. Process/Resource Manager:
 
 ### Shell Example:
-> cr A 1
+>> cr A 1
 Process A is running
-> cr B 2
+>> cr B 2
 Process B is running
-> cr C 1
+>> cr C 1
 Process B is running
-> req R1, 1
+>> req R1, 1
 Process B is blocked; process A is running
 
