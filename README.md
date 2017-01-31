@@ -165,12 +165,13 @@ c. Process/Resource Manager:
 - Preemption
 	- Change status of p to running (status of self already changed to ready/blocked)
 	- Context switch - output of nmae of running process
+# create / release 
+# request / time-out
+# destroy
 
 	Scheduler() {
 		find highest priority process p
-		if (self->priority < p->priority ||  # create / release
-			 self->Status.Type != 'running' ||  # request / time-out
-			 self == NIL)  # NIL
+		if (self->priority < p->priority ||  self->Status.Type != 'running' || self == NIL)  
 			premep(p, self)  # print the new running process p here
 	}
 
