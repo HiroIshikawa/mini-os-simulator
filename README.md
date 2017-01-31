@@ -221,3 +221,9 @@ c. Process/Resource Manager:
 - Submit program for testing and documentation for evaluation
 
 [To refer to test examples, watch this video again](http://replay.uci.edu/public/summer2013/Bic-kernel-projE_-_MP4_with_Smart_Player_(Large)_-_20130807_01.20.09AM.html)
+
+[Official project spec](http://www.ics.uci.edu/~bic/courses/NUS-OS/PROOFS/bicpr02v2.pdf)
+
+[Reading](http://www.ics.uci.edu/~bic/courses/NUS-OS/PROOFS/bicc04v2.pdf)
+
+[Protocol - Make sure following this](http://www.ics.uci.edu/~bic/courses/143B/Process-Project/protocol.pdf)
