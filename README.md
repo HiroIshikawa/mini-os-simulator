@@ -165,9 +165,9 @@ c. Process/Resource Manager:
 - Preemption
 	- Change status of p to running (status of self already changed to ready/blocked)
 	- Context switch - output of nmae of running process
-# create / release 
-# request / time-out
-# destroy
+- create / release 
+- request / time-out
+- destroy
 
 	Scheduler() {
 		find highest priority process p
