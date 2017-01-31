@@ -47,6 +47,8 @@ c. Process/Resource Manager:
 	> req R1, 1 
 	Process B is blocked; process A is running 
 
+
+
 ## 2. Implementation: Process
 ### States and Operations
 - States: Ready, Running, Block
@@ -105,4 +107,56 @@ c. Process/Resource Manager:
 
 - Process can be destroyed by any of its ancesters or by itself (exit)
 
-### 
+
+
+## 3. Representation of Resources
+### Configuration
+- There is a fixed set of resources
+- Resource Control Block (RCB)
+	- RID
+	- Status : coutner for number of free units, K initial units (fixed), U currently available units (decreases/increases)
+	- Waiting_List : list of blocked processes
+
+### Request Resources (1-unit resource  # n-units resources)
+
+	Request(rid) {
+		r = Get_RCB(rid)
+		if (r->Status == 'free') {  # u > n, where available # of units, u, and requesting # of units, n
+			r->Status == 'allocated'  # u = u - n
+			insert(self->Other_Resources, r)  # n units of resource r
+		} else {
+			self->Status.Type = 'blocked'
+			self->Status.Link = r
+			remove(RL, self)
+			isnert(r->Waiting_List, self)
+			Scheduler()
+		}
+	}
+
+### Release Resources (1-unit resource  # n-units resources)
+
+	Release(rid, n) {  # n is the number of units of resources to release
+		r = Get_RCB(rid)
+		remove(self->Other_Resources, r)  # u = u + n
+		if (r->Waiting_list == 'NIL') {  # while (r->Waiting_List != NIL && u >= req)
+			r->Status = 'free'  # u = u - req
+		} else {  # ---del this line----
+			remove(r->Waiting_List, q) 
+			q->Status.Type = 'ready'
+			q->Status.List = RL
+			insert(q->Other_Resources, r)
+			insert(RL, q)
+			Scheduler()
+		}
+	}
+
+- all requests are satisfied in strict FIFO order
+
+
+
+## 4. Scheduling
+### Outline
+- 3-level priority scheduler 
+- Use preemptive round-robin scheduling within level
+- [Reference to preemtive round-robin scheduling](http://www.read.cs.ucla.edu/111/2007fall/notes/lec7)
+- : 
