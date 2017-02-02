@@ -69,7 +69,7 @@ c. Process/Resource Manager:
 - Other Resources : Linked List like, pointing to resource control block, which results of requets
 - Status : Type (Running/Ready/Blocked)& List (back pointer to either Ready List (if process running) Blocked List (otherwise))
 - Creation Tree : Parent (pointing to parent PCB)/Child (pointing children)
-- Priority : 1, 2, 3 (Init, User, System)
+- Priority : 0, 1, 2 (Init, User, System)
 
 ### Ready List
 - 2 (system), 1 (user), 0 (init)
