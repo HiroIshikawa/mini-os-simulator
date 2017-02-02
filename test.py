@@ -1,11 +1,21 @@
 import mini_os as mo
 
-fname = 'test_input.txt'
+import fnmatch
+import sys
 
-with open(fname) as f:
-	content = f.readlines()
-	# you may also want to remove whitespace characters like `\n` at the end of each line
-	content = [x.strip() for x in content] 
+input = sys.argv[1]
 
-for line in content:
-	mo.driver(line)
+if input.endswith('.txt'):
+	with open(input) as f:
+		content = f.readlines()
+		# you may also want to remove whitespace characters like `\n` at the end of each line
+		content = [x.strip() for x in content] 
+
+	for line in content:
+		mo.driver(line)
+elif input=='s':
+	print("Initiate Shell Mode....")
+	mo.shell()
+
+else: 
+	mo.driver(input)
