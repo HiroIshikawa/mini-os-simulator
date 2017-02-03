@@ -187,6 +187,7 @@ class Manager:
 		q = self.find_highest_priority()
 		if (p.priority < q.priority or p.status.type != 'running' or p == None):
 			self.preemp(q, p)  # print the new running process p here
+			print('Process '+q.pid+' is running')
 		else:
 			print('Process '+p.pid+' is running')
 
