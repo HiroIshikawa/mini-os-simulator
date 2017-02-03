@@ -19,6 +19,12 @@ class ListLayer:
 	def insert(self, p):
 		self.list.append(p)
 
+	def remove(self):
+		p = self.list.popleft()
+		self.list.append(p)
+		q = self.list[0]
+		q.status.type == 'ready'
+
 	def check(self):
 		print('---List Layer---')
 		print('Priority: '+ str(self.priority))
@@ -177,7 +183,7 @@ class Manager:
 		elif self.RL.user.list:
 			return self.RL.user.list[0]
 		else:
-			return self.RL.init.list[0] 
+			return self.RL.init.list[0]
 
 	def preemp(self, q, p):
 		p.status.type = 'ready'
@@ -185,11 +191,55 @@ class Manager:
 
 	def scheduler(self, p):
 		q = self.find_highest_priority()
-		if (p.priority < q.priority or p.status.type != 'running' or p == None):
+		print('exsting highest priority: '+str(q.priority))
+		print('new process priority: '+str(p.priority))
+		if (int(p.priority) < int(q.priority) or p.status.type != 'running' or p == None):
 			self.preemp(q, p)  # print the new running process p here
 			print('Process '+q.pid+' is running')
 		else:
 			print('Process '+p.pid+' is running')
+
+	def create(self, name, priority):
+		"""
+		Create new process.
+
+		Status: (none) -> Ready
+		"""
+		# create PCB data struct / initialize PCB using params
+		p = PCB(name, priority)
+		p.status.type = 'ready'
+		if priority=='1':
+			self.RL.user.insert(p)
+		else:
+			self.RL.system.insert(p)
+		p.status.list = self.RL
+		self.crTree.add(p)
+		self.scheduler(p)
+	 #    link PCB to creation tree
+	 #    insert(RL, PCB)
+	 #    scheduler()
+		pass
+
+	def timeout(self):
+		"""
+		Invoke context switch.
+		"""
+		# find running process
+		p = self.find_highest_priority()
+		# remove the process from RL
+		if p.priority=='2':
+			self.RL.system.remove()
+			q = self.RL.system.list[0]
+			self.scheduler(q)
+		elif p.priority=='1':
+			self.RL.user.remove()
+			q = self.RL.user.list[0]
+			self.scheduler(q)
+		else:
+			print('This is the p: '+p.priority)
+			print('No process running')
+			pass
+		
 
 	def check(self):
 		print('---------Manager----------')
@@ -197,19 +247,6 @@ class Manager:
 		self.crTree.check()
 		print('--------Manager END-------')
 
-
-def create(name, priority):
-	"""
-	Create new process.
-
-	Status: (none) -> Ready
-	"""
-	# create PCB data struct / initialize PCB using params
-	pcb = PCB(name, priority)
- #    link PCB to creation tree
- #    insert(RL, PCB)
- #    scheduler()
-	pass
 
 def destroy():
 	pass
@@ -245,7 +282,7 @@ def is_int(s):
 	except ValueError:
 		return False
 
-def parse(input):
+def parse(manager, input):
 	# check basic command error
 	# checking type
 	if not isinstance(input, str):
@@ -274,7 +311,7 @@ def parse(input):
 			return 'create: priority should be integer'
 		if (int(args[2]) <= 0 or int(args[2]) >= 3):
 			return 'create: priority should be 1 or 2'
-		create()
+		manager.create(args[1], args[2])  # name, priority
 	elif args[0]=='de':
 		if len(args) <= 1:
 			return 'destroy: need one argument, name'
@@ -332,7 +369,7 @@ def parse(input):
 	elif args[0]=='to':
 		if len(args) >= 2:
 			return 'time-out: no argument allowed'
-		timeout()
+		manager.timeout()
 	else:
 		return 'available commands: init, cr <name> <priority>, de <name>, req <resource name> <unit>, rel <resource name> <unit>, to'
 
@@ -342,7 +379,11 @@ def parse(input):
 
 def initiate():
 	manager = Manager()
-	manager.check()
+	# manager.check()
+	while(1):
+		var = raw_input()
+		parse(manager, var)
+		# manager.check()
 
 def call(input):
 	# parse
