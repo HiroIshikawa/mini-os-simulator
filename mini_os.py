@@ -1,38 +1,77 @@
 import sys
 from collections import deque
 
-class ReadyList:
+
+class ListLayer:
 	"""
 	Manage order of processes in different priority
 
 	Attributes:
 		priority: 0 (init), 1 (user), or 2 (system)
 		list: processes
-		list_length: number of processses
+		listLength: number of processses
 	"""
 	def __init__(self, priority):
 		self.priority = priority
-		self.list = []
-		self.list_length = len(self.list)
+		self.list = deque()
+		self.listLength = len(self.list)
 
 	def check(self):
 		print(self.priority)
 		print(self.list)
-		print(self.list_length)
-	
-	# def add(process):
+		print(self.listLength)
 
-class Status:
+
+class ListStack:
 	"""
-	Represents PCB status
+	Manage order of processes in different priority
 
 	Attributes:
-		type: running, ready, or blocked
-		list: backpointer to either ReadyList or BlockedList
+		priority: 0 (init), 1 (user), or 2 (system)
+		list: processes
+		listLength: number of processses
 	"""
-	def __init__(self, type, list):
-		self.type = type
-		self.list = list
+	def __init__(self):
+		self.init = ListLayer(0)
+		self.user = ListLayer(1)
+		self.system = ListLayer(2)
+
+	def check(self):
+		print(self.init.check())
+		print(self.user.check())
+		print(self.system.check())
+
+
+class RCB:
+	"""
+	Represents resource control block
+
+	Attributes:
+		rid: the name of resource
+		status: the status of RCB, initial units and available units
+		waitingList: list of blocked processes
+	"""
+	class Status:
+		"""
+		Represents RCB status
+
+		Attributes:
+			k: initial available units (fixed)
+			u: available units (variable)
+		"""
+		def __init__(self, k, u):
+			self.k = k
+			self.u = u
+
+		def check(self):
+			print(self.k)
+			print(self.u)
+
+	def __init__(self, rid, k, u):
+		self.rid = rid
+		self.status = self.Status(k,u)
+		self.waitingList = ListStack()
+
 
 class CreationTree:
 	"""
@@ -46,33 +85,58 @@ class CreationTree:
 		self.parent = parent
 		self.child = child
 
+	def check(self):
+		print(self.parent)
+		print(self.child)
+
+
 class PCB:
 	"""
 	Process Control Block
 
 	Attributes:
 		pid: name of the process
-		otherResources: points to a resources control block
+		otherResources: points to a resources control block when request happens
 		Status: represents the current status of the process
 		CreationTree: pointing to parent PCB and Chlid PCB
 		priority: 0, 1, or 2
 	"""
+	class Status:
+		"""
+		Represents PCB status
+
+		Attributes:
+			type: running, ready, or blocked
+			list: backpointer to either ReadyList or BlockedList
+		"""
+		def __init__(self, type, list):
+			self.type = type
+			self.list = list
+
+		def check(self):
+			print(self.type)
+			print(self.list)
+
 	def __init__(self, pid, priority):
 		self.pid = pid
-		self.otherResources = deque()
-		self.status = Status()
+		self.otherResources = None
+		self.status = self.Status()
 		self.crTree = CreationTree()
+		self.priority = priority
 
-
-	# def __init__(self, pid, otherResources, status, crTree, priority):
-
+	def check():
+		print(self.pid)
+		print(self.otherResources)
+		self.status.check()
+		self.crTree.check()
+		print(self.priority)
 
 
 def initiate():
 	# destroy everything
 	# make ready list wiht priority 0, 1, 2
-	readyList0 = ReadyList(0)
-	readyList0.check()
+	readyList = ListStack()
+	readyList.check()
 	# readyList1 = ReadyList(1)
 	# readyList2 = ReadyList(2)
 	# create a single process with proprity 0

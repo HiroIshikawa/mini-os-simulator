@@ -233,3 +233,5 @@ c. Process/Resource Manager:
 ## 7. Learnings
 - [Python Classes Basics](https://python.swaroopch.com/oop.html)
 - [Python Linked List Implementation](http://stackoverflow.com/questions/280243/python-linked-list)
+- [OS Scheduling](https://www.cs.rutgers.edu/~pxk/416/notes/07-scheduling.html)
+- [Deadlock Intro](http://www.cs.yale.edu/homes/aspnes/pinewiki/Deadlock.html)
