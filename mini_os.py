@@ -1,7 +1,17 @@
 import sys
 
+class ReadyList:
+	pass
 
 def initiate():
+	# destroy everything
+	# make ready list wiht priority 0, 1, 2
+	readyList0 = ReadyList()
+	readyList1 = ReadyList()
+	readyList2 = ReadyList()
+	# create a single process with proprity 0
+	# initiate 4 resources R1, R2, R3, R4
+	# initiate an IO resource
 	pass
 
 def create():
