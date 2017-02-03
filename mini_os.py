@@ -288,20 +288,26 @@ class Manager:
 		Kill the all child processses of the given process.
 		"""
 		if p:
-			print('yes there is.. lets kill..')
+			print('yes there is...')
 			for child in p.crTree.children:
 				self.kill_tree(child)
+			pri = p.priority
 			for resource in p.otherResources:
 				resource.r.status.u = resource.r.status.u + resource.units
+				if pri=='2':
+					resource.r.waitingList.system.remove(p)
+				elif pri=='1':
+					resource.r.waitingList.user.remove(p)
+				else:
+					print('No process to remove from waiting list')
 			p.otherResources.clear()
 			rl = p.status.list  # delet from the RL
-			pri = p.priority
 			if pri == '2':
 				rl.system.remove(p)
 			elif pri == '1':
 				rl.user.remove(p)
 			else:
-				print('Cant be destroted')
+				print('No process to remove from ready list')
 			p = None
 
 	def tree_search(self, tree, name):
