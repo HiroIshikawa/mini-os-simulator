@@ -5,6 +5,8 @@ import sys
 
 input = sys.argv[1]
 
+mo.initiate()
+
 if input.endswith('.txt'):
 	with open(input) as f:
 		content = f.readlines()
@@ -16,6 +18,5 @@ if input.endswith('.txt'):
 elif input=='s':
 	print("Initiate Shell Mode....")
 	mo.shell()
-
 else: 
 	mo.driver(input)

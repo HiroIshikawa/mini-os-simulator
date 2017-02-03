@@ -16,10 +16,17 @@ class ListLayer:
 		self.list = deque()
 		self.listLength = len(self.list)
 
+	def insert(self, p):
+		self.list.append(p)
+
 	def check(self):
-		print(self.priority)
-		print(self.list)
-		print(self.listLength)
+		print('---List Layer---')
+		print('Priority: '+ str(self.priority))
+		# print(self.list)
+		for i in self.list:
+			i.check()
+		print('-List Layer END-')
+		# print(self.listLength)
 
 
 class ListStack:
@@ -37,9 +44,11 @@ class ListStack:
 		self.system = ListLayer(2)
 
 	def check(self):
-		print(self.init.check())
-		print(self.user.check())
-		print(self.system.check())
+		print('----List Stack----')
+		self.init.check()
+		self.user.check()
+		self.system.check()
+		print('--List Stack END--')
 
 
 class RCB:
@@ -73,23 +82,6 @@ class RCB:
 		self.waitingList = ListStack()
 
 
-class CreationTree:
-	"""
-	Represents the order of creation of processes
-
-	Attributes:
-		parent: the parent PCB of the process
-		child: the child PCB of the process
-	"""
-	def __init__(self, parent, child):
-		self.parent = parent
-		self.child = child
-
-	def check(self):
-		print(self.parent)
-		print(self.child)
-
-
 class PCB:
 	"""
 	Process Control Block
@@ -97,8 +89,8 @@ class PCB:
 	Attributes:
 		pid: name of the process
 		otherResources: points to a resources control block when request happens
-		Status: represents the current status of the process
-		CreationTree: pointing to parent PCB and Chlid PCB
+		status: represents the current status of the process
+		crTree: pointing to parent PCB and Chlid PCB
 		priority: 0, 1, or 2
 	"""
 	class Status:
@@ -107,51 +99,114 @@ class PCB:
 
 		Attributes:
 			type: running, ready, or blocked
-			list: backpointer to either ReadyList or BlockedList
+			list: backpointer to either ReadyList or WaitingList
 		"""
-		def __init__(self, type, list):
-			self.type = type
-			self.list = list
+		def __init__(self):
+			self.type = None
+			self.list = None
+
+		# def __init__(self, type, list):
+		# 	self.type = type
+		# 	self.list = list
 
 		def check(self):
-			print(self.type)
-			print(self.list)
+			print('Type: '+str(self.type))
+			print('List: '+str(self.list))
 
 	def __init__(self, pid, priority):
 		self.pid = pid
 		self.otherResources = None
 		self.status = self.Status()
-		self.crTree = CreationTree()
+		# self.crTree = CreationTree()
+		self.parent = None
+		self.chlid = None
 		self.priority = priority
 
-	def check():
-		print(self.pid)
-		print(self.otherResources)
+	def check(self):
+		print('---PCB---')
+		print('PID: '+self.pid)
+		print('Resources: '+str(self.otherResources))
 		self.status.check()
+		print('Parent: '+str(self.parent))
+		print('Child: '+str(self.parent))
+		print('Priority: '+str(self.priority))
+		print('-PCB END-')
+
+
+class CreationTree:
+	"""
+	Represents the order of creation of processes
+
+	Attributes:
+		root: root of creation tree
+	"""
+	def __init__(self):
+		self.root = deque()
+
+	def add(self, p):
+		self.root.append(p)
+
+	def check(self):
+		print('------CRT------')
+		for i in self.root:
+			i.check()
+		print('----CRT END----')
+
+
+class Manager:
+	"""
+	Manage entire processes and resource management.
+
+	Attributes:
+		RL: ready list
+		crTree: root of CreationTree
+	"""
+	def __init__(self):
+		p = PCB('init',0)
+		self.RL = ListStack()
+		self.crTree = CreationTree()
+		self.crTree.add(p)
+		self.RL.init.insert(p)
+
+	def check(self):
+		print('---------Manager----------')
+		self.RL.check()
 		self.crTree.check()
-		print(self.priority)
+		print('--------Manager END-------')
 
 
-def initiate():
+def create(name, priority):
+	"""
+	Create new process.
+
+	Status: (none) -> Ready
+	"""
+	# create PCB data struct / initialize PCB using params
+	pcb = PCB(name, priority)
+ #    link PCB to creation tree
+ #    insert(RL, PCB)
+ #    scheduler()
+	pass
+
+def destroy():
+	pass
+
+def scheduler():
+	pass
+
+def initialize():
 	# destroy everything
+
 	# make ready list wiht priority 0, 1, 2
 	readyList = ListStack()
 	readyList.check()
-	# readyList1 = ReadyList(1)
-	# readyList2 = ReadyList(2)
 	# create a single process with proprity 0
 	# initiate process
-
+	create('init',0)
 	# add this to ready list 0
 
 	# initiate 4 resources R1, R2, R3, R4
 	# initiate an IO resource
-	pass
-
-def create():
-	pass
-
-def destroy():
 	pass
 
 def request():
@@ -185,7 +240,7 @@ def parse(input):
 	if args[0]=='init':
 		if (len(args) >= 2):
 			return 'init: no argument allowed'
-		initiate()
+		initialize()
 	elif args[0]=='cr':
 		if len(args) <= 2:
 			return 'create: need two arguments, name and priority'
@@ -265,11 +320,14 @@ def parse(input):
 	parsed_input = input
 	return parsed_input
 
-def manager(input):
+def initiate():
+	manager = Manager()
+	manager.check()
+
+def call(input):
 	# parse
 	res = parse(input)
 	return res
-
 
 def display(res):
 	print(res)
@@ -278,7 +336,7 @@ def driver(input):
 	# wait user's input
 	# print(type(var))
 	# call process / resource manager and receive response
-	response = manager(input)
+	response = call(input)
 	# display output
 	display(response)
 	# display()
