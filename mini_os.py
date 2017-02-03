@@ -9,16 +9,6 @@ Errro handlings:
 
 """
 
-
-"""
-Issues
-- Destroy can be applied to any descendent p of the running 
-  process in the creation hierarchy, including the process itself, 
-  regardless of p's state (running, ready, or blocked)
- 
-"""
-
-
 class ListLayer:
 	"""
 	Manage order of processes in different priority
@@ -385,7 +375,10 @@ class Manager:
 		else:
 			r = self.RS.r4
 		p = self.find_highest_priority()  # fetch currently running process
-		if r.status.u >= int(units):  # if units are availble for the requiesting resource
+		if p.pid=='init':
+			print('No request allowed on init process')
+			self.scheduler(p)
+		elif r.status.u >= int(units):  # if units are availble for the requiesting resource
 			print('Availble!!')
 			r.status.u = r.status.u - int(units)  # subtract requested units from available units
 			resource = Resource(r, int(units))  # make resource pack, RCB and consumed units
@@ -494,8 +487,10 @@ def parse(manager, input):
 			return 'destroy: need one argument, name'
 		if len(args) >= 3:
 			return 'destroy: too many arguments'
+		if args[1]=='init':
+			return 'destroy: no destroying init process allowed'
 		if is_int(args[1]):
-			return 'destroy: integer, name should be one char'
+			return 'destroy: integer, process name should be one char'
 		if len(args[1]) >= 2:
 			return 'destroy: too many chars, name should be one char'
 		manager.destroy(args[1])  # pid
