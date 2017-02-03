@@ -273,6 +273,13 @@ class Manager:
 
 		Status: (none) -> Ready
 		"""
+		# conduct the search first to prevent duplicates name
+		init = self.RL.init.list[0]
+		if self.tree_search(init, name):
+			print('No duplicates in process names allowed.')
+			p = self.find_highest_priority()
+			self.scheduler(p)
+			return
 		# create PCB data struct / initialize PCB using params
 		p = PCB(name, priority)  # create new PCB with given pid and priority
 		p.status.type = 'ready'  # set status type 'ready' as default
@@ -424,7 +431,6 @@ class Manager:
 		self.RL.check()
 		self.crTree.check()
 		print('--------Manager END-------')
-
 
 
 def initialize():
