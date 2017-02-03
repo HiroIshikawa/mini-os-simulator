@@ -1,6 +1,15 @@
 import sys
+from collections import deque
 
 class ReadyList:
+	"""
+	Manage order of processes in different priority
+
+	Attributes:
+		priority: 0 (init), 1 (user), or 2 (system)
+		list: processes
+		list_length: number of processses
+	"""
 	def __init__(self, priority):
 		self.priority = priority
 		self.list = []
@@ -13,16 +22,62 @@ class ReadyList:
 	
 	# def add(process):
 
+class Status:
+	"""
+	Represents PCB status
+
+	Attributes:
+		type: running, ready, or blocked
+		list: backpointer to either ReadyList or BlockedList
+	"""
+	def __init__(self, type, list):
+		self.type = type
+		self.list = list
+
+class CreationTree:
+	"""
+	Represents the order of creation of processes
+
+	Attributes:
+		parent: the parent PCB of the process
+		child: the child PCB of the process
+	"""
+	def __init__(self, parent, child):
+		self.parent = parent
+		self.child = child
+
+class PCB:
+	"""
+	Process Control Block
+
+	Attributes:
+		pid: name of the process
+		otherResources: points to a resources control block
+		Status: represents the current status of the process
+		CreationTree: pointing to parent PCB and Chlid PCB
+		priority: 0, 1, or 2
+	"""
+	def __init__(self, pid, priority):
+		self.pid = pid
+		self.otherResources = deque()
+		self.status = Status()
+		self.crTree = CreationTree()
+
+
+	# def __init__(self, pid, otherResources, status, crTree, priority):
+
+
 
 def initiate():
 	# destroy everything
 	# make ready list wiht priority 0, 1, 2
 	readyList0 = ReadyList(0)
 	readyList0.check()
-	readyList1 = ReadyList(1)
-	readyList2 = ReadyList(2)
+	# readyList1 = ReadyList(1)
+	# readyList2 = ReadyList(2)
 	# create a single process with proprity 0
 	# initiate process
+
 	# add this to ready list 0
 
 	# initiate 4 resources R1, R2, R3, R4

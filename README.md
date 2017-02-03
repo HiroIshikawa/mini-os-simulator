@@ -227,3 +227,9 @@ c. Process/Resource Manager:
 [Reading](http://www.ics.uci.edu/~bic/courses/NUS-OS/PROOFS/bicc04v2.pdf)
 
 [Protocol - Make sure following this](http://www.ics.uci.edu/~bic/courses/143B/Process-Project/protocol.pdf)
+
+
+
+## 7. Learnings
+- [Python Classes Basics](https://python.swaroopch.com/oop.html)
+- [Python Linked List Implementation](http://stackoverflow.com/questions/280243/python-linked-list)
