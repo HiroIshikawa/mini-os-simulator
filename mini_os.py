@@ -21,7 +21,7 @@ class ListLayer:
 		"""Add new PCB at the end of the queue of this layer"""
 		self.list.append(p)
 
-	def remove(self):
+	def rotate(self):
 		"""Replace the head of the queue to the next PCB and
 		put the head to the end of the queue
 		"""
@@ -29,6 +29,16 @@ class ListLayer:
 		self.list.append(p)  # put the head at the end
 		q = self.list[0]  # take the new head PCB
 		q.status.type == 'ready'  # change the type of new PCB to 'ready'
+
+	def remove(self, p):
+		"""Remove particular PCB with destroy
+		"""
+		for i,pcb in enumerate(self.list):
+			if p.pid == pcb.pid:
+				listed_queue = list(self.list)
+				listed_queue.pop(i)
+				# self.list.clear()
+				self.list = deque(listed_queue)
 
 	def check(self):
 		print('---List Layer---')
@@ -148,13 +158,33 @@ class PCB:
 			print('Type: '+str(self.type))
 			print('List: '+str(self.list))
 
+
+	class CreationTree:
+		"""
+		Represents the order of creation of processes
+
+		Attributes:
+			parent: parent PCB
+			children: children PCB
+		"""
+		def __init__(self):
+			self.parent = None
+			self.children = deque()
+
+		def check(self):
+			print('Parent: '+self.parent.check())
+			print('Children: ')
+			for child in self.children:
+				child.check()
+
 	def __init__(self, pid, priority):
 		self.pid = pid
 		self.otherResources = deque()
 		self.status = self.Status()
 		# self.crTree = CreationTree()
-		self.parent = None
-		self.child = None
+		# self.parent = None
+		# self.child = None
+		self.crTree = self.CreationTree()
 		self.priority = priority
 
 	def check(self):
@@ -162,36 +192,23 @@ class PCB:
 		print('PID: '+self.pid)
 		print('Resources: '+str(self.otherResources))
 		self.status.check()
-		print('Parent: '+str(self.parent))
-		print('Child: '+str(self.child))
+		self.crTree.check()
 		print('Priority: '+str(self.priority))
 		print('-PCB END-')
 
 
-class CreationTree:
+
+class Resource:
 	"""
-	Represents the order of creation of processes
+	Represents resource unit in other resources in PCB
 
 	Attributes:
-		root: root of creation tree
+		rcb: RCB
+		unit: consumed resource
 	"""
-	def __init__(self):
-		self.root = deque()
-
-	def add(self, p):
-		"""Add nwe porcess to creatino tree"""
-		self.root.append(p)
-
-	def search(self, pid):
-		for pcb in self.root:
-			if pcb.pid == pid:
-				return pcb
-
-	def check(self):
-		print('------CRT------')
-		for i in self.root:
-			i.check()
-		print('----CRT END----')
+	def __init__(self, r, units):
+		self.r = r
+		self.units = units
 
 
 class Manager:
@@ -205,11 +222,12 @@ class Manager:
 	"""
 	def __init__(self):
 		p = PCB('init',0)
-		p.status.type = 'ready' 
+		p.status.type = 'ready'
+		p.crTree.parent = None
 		self.RL = ListStack()
 		p.status.list = self.RL
-		self.crTree = CreationTree()
-		self.crTree.add(p)
+		# self.crTree = CreationTree()
+		# self.crTree.add(p)
 		self.RL.init.insert(p)
 		self.RS = ResourceStack()
 		self.scheduler(p)
@@ -250,23 +268,57 @@ class Manager:
 		# create PCB data struct / initialize PCB using params
 		p = PCB(name, priority)  # create new PCB with given pid and priority
 		p.status.type = 'ready'  # set status type 'ready' as default
+		# establish link between currently running process and this new process
+		q = self.find_highest_priority()
+		print('Appending '+p.pid+' to '+q.pid)
+		q.crTree.children.append(p)
+		print('child: '+q.crTree.children[0].pid)
+		p.crTree.parent = q
+		print('parent: '+p.crTree.parent.pid)
 		if priority=='1':
 			self.RL.user.insert(p)
 		else:
 			self.RL.system.insert(p)
 		p.status.list = self.RL
-		self.crTree.add(p)
-		last = self.crTree.root.pop()  # take copy of PCB added the last time
-		self.crTree.root.append(last)  # just append back the copied last PCB
-		p.parent = last
-		last.child = p
 		self.scheduler(p)
 
 	def kill_tree(self, p):
 		"""
 		Kill the all child processses of the given process.
 		"""
-		pass
+		if p:
+			print('yes there is.. lets kill..')
+			for child in p.crTree.children:
+				self.kill_tree(child)
+			for resource in p.otherResources:
+				resource.r.status.u = resource.r.status.u + resource.units
+			p.otherResources.clear()
+			rl = p.status.list  # delet from the RL
+			pri = p.priority
+			if pri == '2':
+				rl.system.remove(p)
+			elif pri == '1':
+				rl.user.remove(p)
+			else:
+				print('Cant be destroted')
+
+			p = None
+
+	def tree_search(self, tree, name):
+		"""
+		Search an element.
+		"""
+		result = None
+		if not tree.crTree.children:
+			print('No children found')
+			return
+		for child in tree.crTree.children:
+			if child.pid == name:
+				print('Target found: '+child.pid)
+				return child
+			else:
+				result = self.tree_search(child, name)
+		return result
 
 	def destroy(self, name):
 		"""
@@ -274,11 +326,16 @@ class Manager:
 
 		Status: Running/Ready/Blocked -> (None)
 		"""
-		# p = self.crTree.search(name)  # find a pcb with the pid
-		# self.kill_tree(p)
-		# q = self.find_highest_priority()
-		# self.scheduler(q)
-		pass
+		root = self.RL.init.list[0]  # init process
+		print('root: '+root.pid)
+		# start search from root
+		target = self.tree_search(root, name)
+		print('Found target: '+target.pid)
+		if target:
+			print('Target found. Killing..')
+			self.kill_tree(target)
+		q = self.find_highest_priority()
+		self.scheduler(q)
 
 	def request(self, rid, units):
 		if rid=='R1':
@@ -293,19 +350,20 @@ class Manager:
 		if r.status.u >= int(units):  # if units are availble for the requiesting resource
 			print('Availble!!')
 			r.status.u = r.status.u - int(units)  # subtract requested units from available units
-			p.otherResources.append(r)  # append the RCB to other resources in the runnnig PCB
+			resource = Resource(r, int(units))  # make resource pack, RCB and consumed units
+			p.otherResources.append(resource)  # append the resource to other resources in the runnnig PCB
 			self.scheduler(p)
 		else:
 			print('Not available, should wait!')
 			p.status.type = 'blocked'
 			p.status.list = r
 			if p.priority=='2':
-				self.RL.system.remove()
+				self.RL.system.rotate()
 				r.waitingList.system.insert(p)
 				q = self.RL.system.list[0]
 				self.scheduler(q)
 			elif p.priority=='1':
-				self.RL.user.remove()
+				self.RL.user.rotate()
 				r.waitingList.user.insert(p)
 				q = self.RL.user.list[0]
 				self.scheduler(q)
@@ -319,11 +377,11 @@ class Manager:
 		"""
 		p = self.find_highest_priority()  # finding running process
 		if p.priority=='2':
-			self.RL.system.remove()
+			self.RL.system.rotate()
 			q = self.RL.system.list[0]
 			self.scheduler(q)
 		elif p.priority=='1':
-			self.RL.user.remove()
+			self.RL.user.rotate()
 			q = self.RL.user.list[0]
 			self.scheduler(q)
 		else:
@@ -371,7 +429,7 @@ def parse(manager, input):
 	# checking type
 	if not isinstance(input, str):
 		return
-	# remove leading/ending whitespaces
+	# rotate leading/ending whitespaces
 	input.strip()
 	# count number of args
 	args = input.split()
