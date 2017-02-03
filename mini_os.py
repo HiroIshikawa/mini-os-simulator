@@ -1,15 +1,30 @@
 import sys
 
 class ReadyList:
-	pass
+	def __init__(self, priority):
+		self.priority = priority
+		self.list = []
+		self.list_length = len(self.list)
+
+	def check(self):
+		print(self.priority)
+		print(self.list)
+		print(self.list_length)
+	
+	# def add(process):
+
 
 def initiate():
 	# destroy everything
 	# make ready list wiht priority 0, 1, 2
-	readyList0 = ReadyList()
-	readyList1 = ReadyList()
-	readyList2 = ReadyList()
+	readyList0 = ReadyList(0)
+	readyList0.check()
+	readyList1 = ReadyList(1)
+	readyList2 = ReadyList(2)
 	# create a single process with proprity 0
+	# initiate process
+	# add this to ready list 0
+
 	# initiate 4 resources R1, R2, R3, R4
 	# initiate an IO resource
 	pass
