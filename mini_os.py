@@ -294,12 +294,12 @@ class Manager:
 			pri = p.priority
 			for resource in p.otherResources:
 				resource.r.status.u = resource.r.status.u + resource.units
-				if pri=='2':
-					resource.r.waitingList.system.remove(p)
-				elif pri=='1':
-					resource.r.waitingList.user.remove(p)
-				else:
-					print('No process to remove from waiting list')
+				# if pri=='2':
+				# 	resource.r.waitingList.system.remove(p)
+				# elif pri=='1':
+				# 	resource.r.waitingList.user.remove(p)
+				# else:
+				# 	print('No process to remove from waiting list')
 			p.otherResources.clear()
 			rl = p.status.list  # delet from the RL
 			if pri == '2':
@@ -362,7 +362,7 @@ class Manager:
 		else:
 			print('Not available, should wait!')
 			p.status.type = 'blocked'
-			p.status.list = r
+			p.status.list = r.waitingList
 			if p.priority=='2':
 				self.RL.system.rotate()
 				r.waitingList.system.insert(p)
