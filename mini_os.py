@@ -2,6 +2,23 @@ import sys
 from collections import deque
 
 
+"""
+Errro handlings:
+- if you try to destroy a process that hasn't been created
+- if you try to release a resource that hasn't been requested
+
+"""
+
+
+"""
+Issues
+- Destroy can be applied to any descendent p of the running 
+  process in the creation hierarchy, including the process itself, 
+  regardless of p's state (running, ready, or blocked)
+ 
+"""
+
+
 class ListLayer:
 	"""
 	Manage order of processes in different priority
@@ -315,14 +332,20 @@ class Manager:
 		Search an element.
 		"""
 		result = None
-		if not tree.crTree.children:
-			print('No children found')
-			return
-		for child in tree.crTree.children:
-			if child.pid == name:
-				print('Target found: '+child.pid)
-				return child
-			else:
+		# if not tree.crTree.children:
+		# 	print('Theres no children')
+		# 	return
+		# for child in tree.crTree.children:
+		# 	if child.pid == name:
+		# 		print('Target found: '+child.pid)
+		# 		return child
+		# 	else:
+		# 		result = self.tree_search(child, name)
+		if tree.pid == name:
+			print('Target found: '+tree.pid)
+			return tree
+		else:
+			for child in tree.crTree.children:
 				result = self.tree_search(child, name)
 		return result
 
@@ -331,15 +354,24 @@ class Manager:
 		Destroy the process, name.
 
 		Status: Running/Ready/Blocked -> (None)
+		Restricted to apply this to the descendants of
+		currently running process or the process itself
 		"""
-		root = self.RL.init.list[0]  # init process
-		print('root: '+root.pid)
+		# root = self.RL.init.list[0]  # init process
+		p = self.find_highest_priority()  # the running process
+		# print('root: '+root.pid)
+		print('currently running: '+p.pid)
 		# start search from root
-		target = self.tree_search(root, name)
-		print('Found target: '+target.pid)
+		# target = self.tree_search(root, name)
+	# if name == p.pid:
+	# 	self.kill_tree(p)
+	# else:
+		target = self.tree_search(p, name)
 		if target:
-			print('Target found. Killing..')
+			print('Found target: '+target.pid)
 			self.kill_tree(target)
+		else:
+			print('THe process does not exist below the running process or is not the running process')
 		q = self.find_highest_priority()
 		self.scheduler(q)
 
