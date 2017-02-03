@@ -264,11 +264,12 @@ class Manager:
 			r = self.RS.r4
 		p = self.find_highest_priority()  # fetch currently running process
 		if r.status.u >= int(units):  # if units are availble for the requiesting resource
-			print("Availble!!")
+			print('Availble!!')
 			r.status.u = r.status.u - int(units)  # subtract requested units from available units
 			p.otherResources.append(r)  # append the RCB to other resources in the runnnig PCB
 			self.scheduler(p)
 		else:
+			print('Not available, should wait!')
 			p.status.type = 'blocked'
 			p.status.list = r
 			if p.priority=='2':
