@@ -235,3 +235,4 @@ c. Process/Resource Manager:
 - [Python Linked List Implementation](http://stackoverflow.com/questions/280243/python-linked-list)
 - [OS Scheduling](https://www.cs.rutgers.edu/~pxk/416/notes/07-scheduling.html)
 - [Deadlock Intro](http://www.cs.yale.edu/homes/aspnes/pinewiki/Deadlock.html)
+- [Python Library Collections Doc](https://docs.python.org/2/library/collections.html#collections.deque)
