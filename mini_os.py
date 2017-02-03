@@ -163,10 +163,30 @@ class Manager:
 	"""
 	def __init__(self):
 		p = PCB('init',0)
+		p.status.type = 'ready'
 		self.RL = ListStack()
+		p.status.list = self.RL
 		self.crTree = CreationTree()
 		self.crTree.add(p)
 		self.RL.init.insert(p)
+		self.scheduler(p)
+
+	def find_highest_priority(self):
+		if self.RL.system.list:
+			return self.RL.system.list[0]
+		elif self.RL.user.list:
+			return self.RL.user.list[0]
+		else:
+			return self.RL.init.list[0] 
+
+	def preemp(self, q, p):
+		p.status.type = 'ready'
+		q.status.type = 'running'
+
+	def scheduler(self, p):
+		q = self.find_highest_priority()
+		if (p.priority < q.priority or p.status.type != 'running' or p == None):
+			self.preemp(q, p)  # print the new running process p here
 
 	def check(self):
 		print('---------Manager----------')
@@ -189,9 +209,6 @@ def create(name, priority):
 	pass
 
 def destroy():
-	pass
-
-def scheduler():
 	pass
 
 def initialize():
