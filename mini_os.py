@@ -12,18 +12,23 @@ class ListLayer:
 		listLength: number of processses
 	"""
 	def __init__(self, priority):
+		"""Initiate layer with priority"""
 		self.priority = priority
-		self.list = deque()
-		self.listLength = len(self.list)
+		self.list = deque()  # deque works well for timeout
+		self.listLength = len(self.list)  # used for stats
 
 	def insert(self, p):
+		"""Add new PCB at the end of the queue of this layer"""
 		self.list.append(p)
 
 	def remove(self):
-		p = self.list.popleft()
-		self.list.append(p)
-		q = self.list[0]
-		q.status.type == 'ready'
+		"""Replace the head of the queue to the next PCB and
+		put the head to the end of the queue
+		"""
+		p = self.list.popleft()  # pop the head
+		self.list.append(p)  # put the head at the end
+		q = self.list[0]  # take the new head PCB
+		q.status.type == 'ready'  # change the type of new PCB to 'ready'
 
 	def check(self):
 		print('---List Layer---')
@@ -45,6 +50,7 @@ class ListStack:
 		listLength: number of processses
 	"""
 	def __init__(self):
+		"""Initiate a stack of lists for each priority levels"""
 		self.init = ListLayer(0)
 		self.user = ListLayer(1)
 		self.system = ListLayer(2)
@@ -150,6 +156,7 @@ class CreationTree:
 		self.root = deque()
 
 	def add(self, p):
+		"""Add nwe porcess to creatino tree"""
 		self.root.append(p)
 
 	def check(self):
@@ -178,6 +185,7 @@ class Manager:
 		self.scheduler(p)
 
 	def find_highest_priority(self):
+		"""Find the PCB with highest prioirity"""
 		if self.RL.system.list:
 			return self.RL.system.list[0]
 		elif self.RL.user.list:
@@ -186,15 +194,19 @@ class Manager:
 			return self.RL.init.list[0]
 
 	def preemp(self, q, p):
-		p.status.type = 'ready'
-		q.status.type = 'running'
+		"""Swap the state of two processes"""
+		p.status.type = 'ready'  # make currently running processs to be ready
+		q.status.type = 'running'  # make currently ready process to be running
 
 	def scheduler(self, p):
+		"""Execute policy everytime command happend"""
 		q = self.find_highest_priority()
 		print('exsting highest priority: '+str(q.priority))
 		print('new process priority: '+str(p.priority))
-		if (int(p.priority) < int(q.priority) or p.status.type != 'running' or p == None):
-			self.preemp(q, p)  # print the new running process p here
+		if (int(p.priority) < int(q.priority) or  # called from create or release
+			p.status.type != 'running' or  		  # called from request or timeout
+			p == None):							  # called from destroy
+			self.preemp(q, p)
 			print('Process '+q.pid+' is running')
 		else:
 			print('Process '+p.pid+' is running')
@@ -206,8 +218,8 @@ class Manager:
 		Status: (none) -> Ready
 		"""
 		# create PCB data struct / initialize PCB using params
-		p = PCB(name, priority)
-		p.status.type = 'ready'
+		p = PCB(name, priority)  # create new PCB with given pid and priority
+		p.status.type = 'ready'  # set status type 'ready' as default
 		if priority=='1':
 			self.RL.user.insert(p)
 		else:
@@ -215,18 +227,12 @@ class Manager:
 		p.status.list = self.RL
 		self.crTree.add(p)
 		self.scheduler(p)
-	 #    link PCB to creation tree
-	 #    insert(RL, PCB)
-	 #    scheduler()
-		pass
 
 	def timeout(self):
 		"""
 		Invoke context switch.
 		"""
-		# find running process
-		p = self.find_highest_priority()
-		# remove the process from RL
+		p = self.find_highest_priority()  # finding running process
 		if p.priority=='2':
 			self.RL.system.remove()
 			q = self.RL.system.list[0]
@@ -238,9 +244,7 @@ class Manager:
 		else:
 			print('This is the p: '+p.priority)
 			print('No process running')
-			pass
 		
-
 	def check(self):
 		print('---------Manager----------')
 		self.RL.check()
