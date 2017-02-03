@@ -154,7 +154,7 @@ class PCB:
 		self.status = self.Status()
 		# self.crTree = CreationTree()
 		self.parent = None
-		self.chlid = None
+		self.child = None
 		self.priority = priority
 
 	def check(self):
@@ -163,7 +163,7 @@ class PCB:
 		print('Resources: '+str(self.otherResources))
 		self.status.check()
 		print('Parent: '+str(self.parent))
-		print('Child: '+str(self.parent))
+		print('Child: '+str(self.child))
 		print('Priority: '+str(self.priority))
 		print('-PCB END-')
 
@@ -181,6 +181,11 @@ class CreationTree:
 	def add(self, p):
 		"""Add nwe porcess to creatino tree"""
 		self.root.append(p)
+
+	def search(self, pid):
+		for pcb in self.root:
+			if pcb.pid == pid:
+				return pcb
 
 	def check(self):
 		print('------CRT------')
@@ -251,7 +256,29 @@ class Manager:
 			self.RL.system.insert(p)
 		p.status.list = self.RL
 		self.crTree.add(p)
+		last = self.crTree.root.pop()  # take copy of PCB added the last time
+		self.crTree.root.append(last)  # just append back the copied last PCB
+		p.parent = last
+		last.child = p
 		self.scheduler(p)
+
+	def kill_tree(self, p):
+		"""
+		Kill the all child processses of the given process.
+		"""
+		pass
+
+	def destroy(self, name):
+		"""
+		Destroy the process, name.
+
+		Status: Running/Ready/Blocked -> (None)
+		"""
+		# p = self.crTree.search(name)  # find a pcb with the pid
+		# self.kill_tree(p)
+		# q = self.find_highest_priority()
+		# self.scheduler(q)
+		pass
 
 	def request(self, rid, units):
 		if rid=='R1':
@@ -310,8 +337,6 @@ class Manager:
 		print('--------Manager END-------')
 
 
-def destroy():
-	pass
 
 def initialize():
 	# destroy everything
@@ -380,7 +405,7 @@ def parse(manager, input):
 			return 'destroy: integer, name should be one char'
 		if len(args[1]) >= 2:
 			return 'destroy: too many chars, name should be one char'
-		destroy()
+		manager.destroy(args[1])  # pid
 	elif args[0]=='req':
 		if len(args) <= 2:
 			return 'reqeust: need two arguments, name and priority'
