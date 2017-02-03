@@ -374,7 +374,7 @@ class Manager:
 				q = self.RL.user.list[0]
 				self.scheduler(q)
 			else:
-				print('Req, this is the p: '+p.priority)
+				print('Req, this is the p: '+str(p.priority))
 				print('Req No process running')
 
 	def timeout(self):
@@ -391,8 +391,8 @@ class Manager:
 			q = self.RL.user.list[0]
 			self.scheduler(q)
 		else:
-			print('To, this is the p: '+p.priority)
-			print('No process running')
+			print('To, this is the p: '+str(p.priority))
+			self.scheduler(p)
 		
 	def check(self):
 		print('---------Manager----------')
