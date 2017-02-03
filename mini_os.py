@@ -25,8 +25,9 @@ class ListLayer:
 		"""Replace the head of the queue to the next PCB and
 		put the head to the end of the queue
 		"""
-		p = self.list.popleft()  # pop the head
-		self.list.append(p)  # put the head at the end
+		p = self.list.rotate(-1)
+		# p = self.list.popleft()  # pop the head
+		# self.list.append(p)  # put the head at the end
 		q = self.list[0]  # take the new head PCB
 		q.status.type == 'ready'  # change the type of new PCB to 'ready'
 
@@ -301,7 +302,6 @@ class Manager:
 				rl.user.remove(p)
 			else:
 				print('Cant be destroted')
-
 			p = None
 
 	def tree_search(self, tree, name):
@@ -412,9 +412,6 @@ def initialize():
 	pass
 
 def release():
-	pass
-
-def timeout():
 	pass
 
 def is_int(s):
