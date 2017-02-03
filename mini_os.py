@@ -85,14 +85,37 @@ class RCB:
 			self.u = u
 
 		def check(self):
-			print(self.k)
-			print(self.u)
+			print('Capacity: '+str(self.k))
+			print('Available: '+str(self.u))
 
 	def __init__(self, rid, k, u):
 		self.rid = rid
 		self.status = self.Status(k,u)
 		self.waitingList = ListStack()
 
+	def check():
+		print('RID: '+str(self.rid))
+		self.status.check()
+		self.waitingList.check()
+
+
+class ResourceStack:
+	"""
+	Represents the set of RCBs used in the session.
+
+
+	"""
+	def __init__(self):
+		self.r1 = RCB('R1',1,1)
+		self.r2 = RCB('R2',2,2)
+		self.r3 = RCB('R3',3,3)
+		self.r4 = RCB('R4',4,4)
+
+	def check():
+		self.r1.check()
+		self.r2.check()
+		self.r3.check()
+		self.r4.check()
 
 class PCB:
 	"""
@@ -127,7 +150,7 @@ class PCB:
 
 	def __init__(self, pid, priority):
 		self.pid = pid
-		self.otherResources = None
+		self.otherResources = deque()
 		self.status = self.Status()
 		# self.crTree = CreationTree()
 		self.parent = None
@@ -173,15 +196,17 @@ class Manager:
 	Attributes:
 		RL: ready list
 		crTree: root of CreationTree
+		RS: resource stack
 	"""
 	def __init__(self):
 		p = PCB('init',0)
-		p.status.type = 'ready'
+		p.status.type = 'ready' 
 		self.RL = ListStack()
 		p.status.list = self.RL
 		self.crTree = CreationTree()
 		self.crTree.add(p)
 		self.RL.init.insert(p)
+		self.RS = ResourceStack()
 		self.scheduler(p)
 
 	def find_highest_priority(self):
@@ -195,21 +220,21 @@ class Manager:
 
 	def preemp(self, q, p):
 		"""Swap the state of two processes"""
-		p.status.type = 'ready'  # make currently running processs to be ready
+		p.status.type = 'ready'    # make currently running processs to be ready
 		q.status.type = 'running'  # make currently ready process to be running
 
 	def scheduler(self, p):
 		"""Execute policy everytime command happend"""
 		q = self.find_highest_priority()
-		print('exsting highest priority: '+str(q.priority))
-		print('new process priority: '+str(p.priority))
+		print('exsting highest priority: '+str(q.priority)+' '+str(q.pid)+' '+str(q.status.type))
+		print('new process priority: '+str(p.priority)+' '+str(p.pid)+' '+str(p.status.type))
 		if (int(p.priority) < int(q.priority) or  # called from create or release
 			p.status.type != 'running' or  		  # called from request or timeout
 			p == None):							  # called from destroy
 			self.preemp(q, p)
-			print('Process '+q.pid+' is running')
+			print('Preempted, Process '+q.pid+' is running')
 		else:
-			print('Process '+p.pid+' is running')
+			print('Keep it, Process '+p.pid+' is running')
 
 	def create(self, name, priority):
 		"""
@@ -228,6 +253,38 @@ class Manager:
 		self.crTree.add(p)
 		self.scheduler(p)
 
+	def request(self, rid, units):
+		if rid=='R1':
+			r = self.RS.r1
+		elif rid=='R2':
+			r = self.RS.r2
+		elif rid=='R3':
+			r = self.RS.r3
+		else:
+			r = self.RS.r4
+		p = self.find_highest_priority()  # fetch currently running process
+		if r.status.u >= int(units):  # if units are availble for the requiesting resource
+			print("Availble!!")
+			r.status.u = r.status.u - int(units)  # subtract requested units from available units
+			p.otherResources.append(r)  # append the RCB to other resources in the runnnig PCB
+			self.scheduler(p)
+		else:
+			p.status.type = 'blocked'
+			p.status.list = r
+			if p.priority=='2':
+				self.RL.system.remove()
+				r.waitingList.system.insert(p)
+				q = self.RL.system.list[0]
+				self.scheduler(q)
+			elif p.priority=='1':
+				self.RL.user.remove()
+				r.waitingList.user.insert(p)
+				q = self.RL.user.list[0]
+				self.scheduler(q)
+			else:
+				print('Req, this is the p: '+p.priority)
+				print('Req No process running')
+
 	def timeout(self):
 		"""
 		Invoke context switch.
@@ -242,7 +299,7 @@ class Manager:
 			q = self.RL.user.list[0]
 			self.scheduler(q)
 		else:
-			print('This is the p: '+p.priority)
+			print('To, this is the p: '+p.priority)
 			print('No process running')
 		
 	def check(self):
@@ -268,9 +325,6 @@ def initialize():
 
 	# initiate 4 resources R1, R2, R3, R4
 	# initiate an IO resource
-	pass
-
-def request():
 	pass
 
 def release():
@@ -315,7 +369,7 @@ def parse(manager, input):
 			return 'create: priority should be integer'
 		if (int(args[2]) <= 0 or int(args[2]) >= 3):
 			return 'create: priority should be 1 or 2'
-		manager.create(args[1], args[2])  # name, priority
+		manager.create(args[1], args[2])  # pid, priority
 	elif args[0]=='de':
 		if len(args) <= 1:
 			return 'destroy: need one argument, name'
@@ -347,7 +401,19 @@ def parse(manager, input):
 			return 'reqeust: unit should be integer'
 		if int(args[2]) <= 0 or int(args[2]) >= 3:
 			return 'reqeust: unit should be 1,2,3 or 4'
-		request()
+		if int(args[1][1]) == 1:
+			if int(args[2]) != 1:
+		 		return 'request: R1 can take only 1 unit to request'
+		if int(args[1][1]) == 2:
+			if int(args[2]) >= 3:
+		 		return 'request: R2 can take only 2 unit max to request'
+		if int(args[1][1]) == 3:
+			if int(args[2]) >= 4:
+		 		return 'request: R3 can take only 3 unit max to request'
+		if int(args[1][1]) == 4:
+			if int(args[2]) >= 5:
+		 		return 'request: R4 can take only 4 unit max to request'
+		manager.request(args[1], args[2])  # rid, units
 	elif args[0]=='rel':
 		if len(args) <= 2:
 			return 'release: need two arguments, name and priority'
@@ -386,7 +452,8 @@ def initiate():
 	# manager.check()
 	while(1):
 		var = raw_input()
-		parse(manager, var)
+		res = parse(manager, var)
+		# print(res)
 		# manager.check()
 
 def call(input):
