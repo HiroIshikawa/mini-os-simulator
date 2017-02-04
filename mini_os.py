@@ -360,6 +360,8 @@ class Manager:
 		else:
 			for child in tree.crTree.children:
 				result = self.tree_search(child, name)
+				if result:
+					break
 		return result
 
 	def destroy(self, name):
@@ -563,7 +565,7 @@ def parse(manager, input):
 		 	return 'request: resource name, should be R1,R2,R3,or R4'
 		if not is_int(args[2]):
 			return 'reqeust: unit should be integer'
-		if int(args[2]) <= 0 or int(args[2]) >= 3:
+		if int(args[2]) <= 0 or int(args[2]) >= 5:
 			return 'reqeust: unit should be 1,2,3 or 4'
 		if int(args[1][1]) == 1:
 			if int(args[2]) != 1:
