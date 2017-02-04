@@ -42,8 +42,10 @@ class ListLayer:
 		"""Remove particular PCB with destroy
 		"""
 		for i,pcb in enumerate(self.list):
+			print('Removing, current list contents: '+str(len(self.list)))
 			if p.pid == pcb.pid:
 				listed_queue = list(self.list)
+				print('popping: '+p.pid)
 				listed_queue.pop(i)
 				# self.list.clear()
 				self.list = deque(listed_queue)
@@ -109,12 +111,16 @@ class RCB:
 	def __init__(self, rid, k, u):
 		self.rid = rid
 		self.status = self.Status(k,u)
-		self.waitingList = ListStack()
+		# self.waitingList = ListStack()
+		self.waitingList = []
 
 	def check():
 		print('RID: '+str(self.rid))
 		self.status.check()
-		self.waitingList.check()
+		# self.waitingList.check()
+		print('waiting list: ')
+		for p in waitingList:
+			p.check()
 
 
 class ResourceStack:
@@ -307,22 +313,32 @@ class Manager:
 				self.kill_tree(child)
 			pri = p.priority
 			for resource in p.otherResources:
-				resource.r.status.u = resource.r.status.u + resource.units
-				# if pri=='2':
-				# 	resource.r.waitingList.system.remove(p)
-				# elif pri=='1':
-				# 	resource.r.waitingList.user.remove(p)
-				# else:
-				# 	print('No process to remove from waiting list')
+				self.release(resource.r.rid, resource.units)
 			p.otherResources.clear()
+			parent = p.crTree.parent
+			for i, child in enumerate(parent.crTree.children):
+				if p.pid == child.pid:
+					listed_children = list(parent.crTree.children)
+					# print('popping: '+p.pid)
+					listed_children.pop(i)
+					# self.list.clear()
+					parent.crTree.children = deque(listed_children)
+					print('Depoint '+p.pid+' from '+parent.pid)
 			rl = p.status.list  # delet from the RL
-			if pri == '2':
-				rl.system.remove(p)
-			elif pri == '1':
-				rl.user.remove(p)
+			if not isinstance(rl, list):
+				if pri == '2':
+					rl.system.remove(p)
+				elif pri == '1':
+					rl.user.remove(p)
+				else:
+					print('No process to remove from ready list')
 			else:
-				print('No process to remove from ready list')
+				for i,pcb_units in enumerate(rl):
+					if p.pid == pcb_units[0].pid:
+						rl.pop(i)
 			p = None
+			return
+		return
 
 	def tree_search(self, tree, name):
 		"""
@@ -372,15 +388,19 @@ class Manager:
 		q = self.find_highest_priority()
 		self.scheduler(q)
 
-	def request(self, rid, units):
+	def find_rcb(self,rid):
 		if rid=='R1':
-			r = self.RS.r1
+			rcb = self.RS.r1
 		elif rid=='R2':
-			r = self.RS.r2
+			rcb = self.RS.r2
 		elif rid=='R3':
-			r = self.RS.r3
+			rcb = self.RS.r3
 		else:
-			r = self.RS.r4
+			rcb = self.RS.r4
+		return rcb
+
+	def request(self, rid, units):
+		r = self.find_rcb(rid)
 		p = self.find_highest_priority()  # fetch currently running process
 		if p.pid=='init':
 			print('No request allowed on init process')
@@ -396,18 +416,45 @@ class Manager:
 			p.status.type = 'blocked'
 			p.status.list = r.waitingList
 			if p.priority=='2':
-				self.RL.system.rotate()
-				r.waitingList.system.insert(p)
+				self.RL.system.remove(p)
+				# r.waitingList.system.insert(p)
+				r.waitingList.append((p, int(units)))  # tuple of the process and units
 				q = self.RL.system.list[0]
 				self.scheduler(q)
 			elif p.priority=='1':
-				self.RL.user.rotate()
-				r.waitingList.user.insert(p)
+				self.RL.user.remove(p)
+				# r.waitingList.user.insert(p)
+				r.waitingList.append((p, int(units)))  # tuple of the process and units
 				q = self.RL.user.list[0]
 				self.scheduler(q)
 			else:
 				print('Req, this is the p: '+str(p.priority))
 				print('Req No process running')
+
+	def release(self, rid, units):
+		r = self.find_rcb(rid)
+		r.status.u = r.status.u + int(units)
+		while r.waitingList:
+			# find the consuming resource package
+			req = r.waitingList[0][1]  # the units requested by the head of waiting list
+			if not r.status.u >= req:
+				break
+			else:
+				q = r.waitingList[0][0]  # the pcb of the head of waiting list
+				r.status.u = r.status.u - req
+				r.waitingList.pop(0)
+				q.status.type = 'ready'
+				q.status.list = self.RL
+				resource = Resource(r, int(req)) 
+				q.otherResources.append(resource)
+				if q.priority=='2':
+					self.RL.system.insert(q)
+				elif q.priority=='1':
+					self.RL.user.insert(q)
+				else:
+					print('No RL level for this found.')
+		p = self.find_highest_priority()
+		self.scheduler(p)
 
 	def timeout(self):
 		"""
@@ -446,9 +493,6 @@ def initialize():
 
 	# initiate 4 resources R1, R2, R3, R4
 	# initiate an IO resource
-	pass
-
-def release():
 	pass
 
 def is_int(s):
@@ -555,7 +599,7 @@ def parse(manager, input):
 			return 'release: unit should be integer'
 		if int(args[2]) <= 0 or int(args[2]) >= 3:
 			return 'release: unit should be 1,2,3,or4'
-		release()
+		manager.release(args[1], args[2])
 	elif args[0]=='to':
 		if len(args) >= 2:
 			return 'time-out: no argument allowed'
