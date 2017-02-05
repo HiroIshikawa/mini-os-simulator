@@ -273,6 +273,14 @@ class Manager:
 		else:
 			print('Keep it, Process '+p.pid+' is running')
 
+	def init(self):
+		p = self.RL.init.list[0]  # find the init
+		try:
+			self.destroy(p.crTree.children[0].pid)  # destroy all the process under the init
+		except IndexError:
+			print('No process exists')
+			pass
+
 	def create(self, name, priority):
 		"""
 		Create new process.
@@ -519,7 +527,7 @@ def parse(manager, input):
 	if args[0]=='init':
 		if (len(args) >= 2):
 			return 'init: no argument allowed'
-		initialize()
+		manager.init()
 	elif args[0]=='cr':
 		if len(args) <= 2:
 			return 'create: need two arguments, name and priority'
