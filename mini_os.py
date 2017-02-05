@@ -42,10 +42,10 @@ class ListLayer:
 		"""Remove particular PCB with destroy
 		"""
 		for i,pcb in enumerate(self.list):
-			print('Removing, current list contents: '+str(len(self.list)))
+			# print('Removing, current list contents: '+str(len(self.list)))
 			if p.pid == pcb.pid:
 				listed_queue = list(self.list)
-				print('popping: '+p.pid)
+				# print('popping: '+p.pid)
 				listed_queue.pop(i)
 				# self.list.clear()
 				self.list = deque(listed_queue)
@@ -263,22 +263,27 @@ class Manager:
 	def scheduler(self, p):
 		"""Execute policy everytime command happend"""
 		q = self.find_highest_priority()
-		print('exsting highest priority: '+str(q.priority)+' '+str(q.pid)+' '+str(q.status.type))
-		print('new process priority: '+str(p.priority)+' '+str(p.pid)+' '+str(p.status.type))
+		# print('exsting highest priority: '+str(q.priority)+' '+str(q.pid)+' '+str(q.status.type))
+		# print('new process priority: '+str(p.priority)+' '+str(p.pid)+' '+str(p.status.type))
 		if (int(p.priority) < int(q.priority) or  # called from create or release
 			p.status.type != 'running' or  		  # called from request or timeout
 			p == None):							  # called from destroy
 			self.preemp(q, p)
-			print('Preempted, Process '+q.pid+' is running')
+			# print('Preempted, Process '+q.pid+' is running')
+			# print(q.pid)
 		else:
-			print('Keep it, Process '+p.pid+' is running')
+			# print('Keep it, Process '+p.pid+' is running')
+			# print(p.pid)
+			pass
 
 	def init(self):
 		p = self.RL.init.list[0]  # find the init
 		try:
-			self.destroy(p.crTree.children[0].pid)  # destroy all the process under the init
+			for child in p.crTree.children:
+				self.kill_tree(child)  # destroy all the process under the init
+			# self.kill_tree(p)
 		except IndexError:
-			print('No process exists')
+			# print('No process exists')
 			pass
 
 	def create(self, name, priority):
@@ -290,7 +295,7 @@ class Manager:
 		# conduct the search first to prevent duplicates name
 		init = self.RL.init.list[0]
 		if self.tree_search(init, name):
-			print('No duplicates in process names allowed.')
+			# print('No duplicates in process names allowed.')
 			p = self.find_highest_priority()
 			self.scheduler(p)
 			return
@@ -299,11 +304,11 @@ class Manager:
 		p.status.type = 'ready'  # set status type 'ready' as default
 		# establish link between currently running process and this new process
 		q = self.find_highest_priority()
-		print('Appending '+p.pid+' to '+q.pid)
+		# print('Appending '+p.pid+' to '+q.pid)
 		q.crTree.children.append(p)
-		print('child: '+q.crTree.children[0].pid)
+		# print('child: '+q.crTree.children[0].pid)
 		p.crTree.parent = q
-		print('parent: '+p.crTree.parent.pid)
+		# print('parent: '+p.crTree.parent.pid)
 		if priority=='1':
 			self.RL.user.insert(p)
 		else:
@@ -316,13 +321,14 @@ class Manager:
 		Kill the all child processses of the given process.
 		"""
 		if p:
-			print('yes there is...')
+			# print('yes there is...')
 			for child in p.crTree.children:
 				self.kill_tree(child)
 			pri = p.priority
 			for resource in p.otherResources:
 				self.release(resource.r.rid, resource.units)
 			p.otherResources.clear()
+			# print('deleting..: '+p.pid)
 			parent = p.crTree.parent
 			for i, child in enumerate(parent.crTree.children):
 				if p.pid == child.pid:
@@ -331,7 +337,7 @@ class Manager:
 					listed_children.pop(i)
 					# self.list.clear()
 					parent.crTree.children = deque(listed_children)
-					print('Depoint '+p.pid+' from '+parent.pid)
+					# print('Depoint '+p.pid+' from '+parent.pid)
 			rl = p.status.list  # delet from the RL
 			if not isinstance(rl, list):
 				if pri == '2':
@@ -339,7 +345,8 @@ class Manager:
 				elif pri == '1':
 					rl.user.remove(p)
 				else:
-					print('No process to remove from ready list')
+					# print('No process to remove from ready list')
+					pass
 			else:
 				for i,pcb_units in enumerate(rl):
 					if p.pid == pcb_units[0].pid:
@@ -363,7 +370,7 @@ class Manager:
 		# 	else:
 		# 		result = self.tree_search(child, name)
 		if tree.pid == name:
-			print('Target found: '+tree.pid)
+			# print('Target found: '+tree.pid)
 			return tree
 		else:
 			for child in tree.crTree.children:
@@ -383,7 +390,7 @@ class Manager:
 		# root = self.RL.init.list[0]  # init process
 		p = self.find_highest_priority()  # the running process
 		# print('root: '+root.pid)
-		print('currently running: '+p.pid)
+		# print('currently running: '+p.pid)
 		# start search from root
 		# target = self.tree_search(root, name)
 	# if name == p.pid:
@@ -391,10 +398,11 @@ class Manager:
 	# else:
 		target = self.tree_search(p, name)
 		if target:
-			print('Found target: '+target.pid)
+			# print('Found target: '+target.pid)
 			self.kill_tree(target)
 		else:
-			print('THe process does not exist below the running process or is not the running process')
+			# print('THe process does not exist below the running process or is not the running process')
+			pass
 		q = self.find_highest_priority()
 		self.scheduler(q)
 
@@ -413,16 +421,16 @@ class Manager:
 		r = self.find_rcb(rid)
 		p = self.find_highest_priority()  # fetch currently running process
 		if p.pid=='init':
-			print('No request allowed on init process')
+			# print('No request allowed on init process')
 			self.scheduler(p)
 		elif r.status.u >= int(units):  # if units are availble for the requiesting resource
-			print('Availble!!')
+			# print('Availble!!')
 			r.status.u = r.status.u - int(units)  # subtract requested units from available units
 			resource = Resource(r, int(units))  # make resource pack, RCB and consumed units
 			p.otherResources.append(resource)  # append the resource to other resources in the runnnig PCB
 			self.scheduler(p)
 		else:
-			print('Not available, should wait!')
+			# print('Not available, should wait!')
 			p.status.type = 'blocked'
 			p.status.list = r.waitingList
 			if p.priority=='2':
@@ -438,8 +446,9 @@ class Manager:
 				q = self.RL.user.list[0]
 				self.scheduler(q)
 			else:
-				print('Req, this is the p: '+str(p.priority))
-				print('Req No process running')
+				# print('Req, this is the p: '+str(p.priority))
+				# print('Req No process running')
+				pass
 
 	def release(self, rid, units):
 		r = self.find_rcb(rid)
@@ -462,7 +471,8 @@ class Manager:
 				elif q.priority=='1':
 					self.RL.user.insert(q)
 				else:
-					print('No RL level for this found.')
+					# print('No RL level for this found.')
+					pass
 		p = self.find_highest_priority()
 		self.scheduler(p)
 
@@ -480,7 +490,7 @@ class Manager:
 			q = self.RL.user.list[0]
 			self.scheduler(q)
 		else:
-			print('To, this is the p: '+str(p.priority))
+			# print('To, this is the p: '+str(p.priority))
 			self.scheduler(p)
 		
 	def check(self):
@@ -616,10 +626,9 @@ def parse(manager, input):
 		manager.timeout()
 	else:
 		return 'available commands: init, cr <name> <priority>, de <name>, req <resource name> <unit>, rel <resource name> <unit>, to'
-
 	# argument
-	parsed_input = input
-	return parsed_input
+	# parsed_input = input
+	# return parsed_input
 
 def initiate():
 	manager = Manager()
@@ -628,12 +637,33 @@ def initiate():
 		var = raw_input()
 		res = parse(manager, var)
 		# print(res)
+		res = manager.find_highest_priority().pid
+		print(res)
 		# manager.check()
 
-def call(input):
+def call(inputs, out):
 	# parse
-	res = parse(input)
-	return res
+	manager = Manager()
+	out.write('init')
+	out.write(' ')
+	for input in inputs:
+		print(input)
+		if input=='':
+			out.write('\n')
+		# res = mo.call(line)
+		# out.write(res)
+		# out.write(' ')
+		else:
+			shell_error_msg = parse(manager, input)
+			if not shell_error_msg:
+				res = manager.find_highest_priority().pid
+				out.write(res)
+				out.write(' ')
+				# return res
+			else:
+				out.write('error')
+				out.write(' ')
+				# return 'error'
 
 def display(res):
 	print(res)
