@@ -278,13 +278,19 @@ class Manager:
 
 	def init(self):
 		p = self.RL.init.list[0]  # find the init
-		try:
+		if p.crTree.children:
 			for child in p.crTree.children:
 				self.kill_tree(child)  # destroy all the process under the init
 			# self.kill_tree(p)
-		except IndexError:
+		else:
 			# print('No process exists')
+			# return 'No process exests'
 			pass
+
+		# except IndexError:
+		# 	print('No process exists')
+		# 	return 'No process exests'
+		# 	pass
 
 	def create(self, name, priority):
 		"""
@@ -298,7 +304,7 @@ class Manager:
 			# print('No duplicates in process names allowed.')
 			p = self.find_highest_priority()
 			self.scheduler(p)
-			return
+			return 'No duplicates in process names allowed.'
 		# create PCB data struct / initialize PCB using params
 		p = PCB(name, priority)  # create new PCB with given pid and priority
 		p.status.type = 'ready'  # set status type 'ready' as default
@@ -400,12 +406,12 @@ class Manager:
 		if target:
 			# print('Found target: '+target.pid)
 			self.kill_tree(target)
+			q = self.find_highest_priority()
+			self.scheduler(q)
 		else:
 			# print('THe process does not exist below the running process or is not the running process')
-			pass
-		q = self.find_highest_priority()
-		self.scheduler(q)
-
+			return 'The process does not exist below the running process or is not the running process'
+		
 	def find_rcb(self,rid):
 		if rid=='R1':
 			rcb = self.RS.r1
@@ -423,6 +429,7 @@ class Manager:
 		if p.pid=='init':
 			# print('No request allowed on init process')
 			self.scheduler(p)
+			return 'No request allowed on init process'
 		elif r.status.u >= int(units):  # if units are availble for the requiesting resource
 			# print('Availble!!')
 			r.status.u = r.status.u - int(units)  # subtract requested units from available units
@@ -448,11 +455,13 @@ class Manager:
 			else:
 				# print('Req, this is the p: '+str(p.priority))
 				# print('Req No process running')
-				pass
+				return 'Req No process running'
 
 	def release(self, rid, units):
 		r = self.find_rcb(rid)
-		r.status.u = r.status.u + int(units)
+		if r.status.k < r.status.u + int(units):
+			return 'Too many resources releasing'
+		r.status.u = r.status.u + int(units)			
 		while r.waitingList:
 			# find the consuming resource package
 			req = r.waitingList[0][1]  # the units requested by the head of waiting list
@@ -537,7 +546,8 @@ def parse(manager, input):
 	if args[0]=='init':
 		if (len(args) >= 2):
 			return 'init: no argument allowed'
-		manager.init()
+		error = manager.init()
+		return error
 	elif args[0]=='cr':
 		if len(args) <= 2:
 			return 'create: need two arguments, name and priority'
@@ -551,7 +561,8 @@ def parse(manager, input):
 			return 'create: priority should be integer'
 		if (int(args[2]) <= 0 or int(args[2]) >= 3):
 			return 'create: priority should be 1 or 2'
-		manager.create(args[1], args[2])  # pid, priority
+		error = manager.create(args[1], args[2])  # pid, priority
+		return error
 	elif args[0]=='de':
 		if len(args) <= 1:
 			return 'destroy: need one argument, name'
@@ -563,7 +574,8 @@ def parse(manager, input):
 			return 'destroy: integer, process name should be one char'
 		if len(args[1]) >= 2:
 			return 'destroy: too many chars, name should be one char'
-		manager.destroy(args[1])  # pid
+		error = manager.destroy(args[1])  # pid
+		return error
 	elif args[0]=='req':
 		if len(args) <= 2:
 			return 'reqeust: need two arguments, name and priority'
@@ -597,7 +609,8 @@ def parse(manager, input):
 		if int(args[1][1]) == 4:
 			if int(args[2]) >= 5:
 		 		return 'request: R4 can take only 4 unit max to request'
-		manager.request(args[1], args[2])  # rid, units
+		error = manager.request(args[1], args[2])  # rid, units
+		return error
 	elif args[0]=='rel':
 		if len(args) <= 2:
 			return 'release: need two arguments, name and priority'
@@ -619,7 +632,8 @@ def parse(manager, input):
 			return 'release: unit should be integer'
 		if int(args[2]) <= 0 or int(args[2]) >= 3:
 			return 'release: unit should be 1,2,3,or4'
-		manager.release(args[1], args[2])
+		error = manager.release(args[1], args[2])
+		return error
 	elif args[0]=='to':
 		if len(args) >= 2:
 			return 'time-out: no argument allowed'
@@ -635,11 +649,14 @@ def initiate():
 	# manager.check()
 	while(1):
 		var = raw_input()
-		res = parse(manager, var)
-		# print(res)
-		res = manager.find_highest_priority().pid
-		print(res)
-		# manager.check()
+		shell_error_msg = parse(manager, var)
+		if not shell_error_msg:
+			res = manager.find_highest_priority().pid
+			print(res)
+			# return res
+		else:
+			print('error')
+			# return 'error'
 
 def call(inputs, out):
 	# parse
