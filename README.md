@@ -1,4 +1,4 @@
-# mini-os-simulator
+# mini-os-simulator: Project 1
 
 ## 1. Process and Resource Manager
 ### Functionality:
@@ -229,10 +229,13 @@ c. Process/Resource Manager:
 [Protocol - Make sure following this](http://www.ics.uci.edu/~bic/courses/143B/Process-Project/protocol.pdf)
 
 
-
 ## 7. Learnings
 - [Python Classes Basics](https://python.swaroopch.com/oop.html)
 - [Python Linked List Implementation](http://stackoverflow.com/questions/280243/python-linked-list)
 - [OS Scheduling](https://www.cs.rutgers.edu/~pxk/416/notes/07-scheduling.html)
 - [Deadlock Intro](http://www.cs.yale.edu/homes/aspnes/pinewiki/Deadlock.html)
 - [Python Library Collections Doc](https://docs.python.org/2/library/collections.html#collections.deque)
+
+
+# mini-os-simulator: Project 2
+Beign project 2

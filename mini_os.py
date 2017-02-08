@@ -332,7 +332,7 @@ class Manager:
 				self.kill_tree(child)
 			pri = p.priority
 			for resource in p.otherResources:
-				self.release(resource.r.rid, resource.units)
+				self.release(resource.r.rid, resource.units, False)
 			p.otherResources.clear()
 			# print('deleting..: '+p.pid)
 			parent = p.crTree.parent
@@ -457,33 +457,51 @@ class Manager:
 				# print('Req No process running')
 				return 'Req No process running'
 
-	def release(self, rid, units):
-		r = self.find_rcb(rid)
-		if r.status.k < r.status.u + int(units):
-			return 'Too many resources releasing'
-		r.status.u = r.status.u + int(units)			
-		while r.waitingList:
-			# find the consuming resource package
-			req = r.waitingList[0][1]  # the units requested by the head of waiting list
-			if not r.status.u >= req:
-				break
-			else:
-				q = r.waitingList[0][0]  # the pcb of the head of waiting list
-				r.status.u = r.status.u - req
-				r.waitingList.pop(0)
-				q.status.type = 'ready'
-				q.status.list = self.RL
-				resource = Resource(r, int(req)) 
-				q.otherResources.append(resource)
-				if q.priority=='2':
-					self.RL.system.insert(q)
-				elif q.priority=='1':
-					self.RL.user.insert(q)
+	def release(self, rid, units, command=True):
+		current = self.find_highest_priority()
+		# proceed = True
+		proceed = False
+		if command:
+			resource_at = None
+			for i,resource in enumerate(current.otherResources):
+				if resource.r.rid == rid:
+					proceed = True
+					resource_at = i
+					break
+		else:
+			proceed = True
+		if proceed:
+			r = self.find_rcb(rid)
+			if r.status.k < r.status.u + int(units):
+				return 'Too many resources releasing'
+			# listed = list(current.otherResources)
+			# listed.pop(resource_at)
+			# current.otherResources = deque(listed)
+			r.status.u = r.status.u + int(units)			
+			while r.waitingList:
+				# find the consuming resource package
+				req = r.waitingList[0][1]  # the units requested by the head of waiting list
+				if not r.status.u >= req:
+					break
 				else:
-					# print('No RL level for this found.')
-					pass
-		p = self.find_highest_priority()
-		self.scheduler(p)
+					q = r.waitingList[0][0]  # the pcb of the head of waiting list
+					r.status.u = r.status.u - req
+					r.waitingList.pop(0)
+					q.status.type = 'ready'
+					q.status.list = self.RL
+					resource = Resource(r, int(req)) 
+					q.otherResources.append(resource)
+					if q.priority=='2':
+						self.RL.system.insert(q)
+					elif q.priority=='1':
+						self.RL.user.insert(q)
+					else:
+						# print('No RL level for this found.')
+						pass
+			p = self.find_highest_priority()
+			self.scheduler(p)
+		else:
+			return 'Not running'
 
 	def timeout(self):
 		"""
