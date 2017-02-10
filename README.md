@@ -239,3 +239,37 @@ c. Process/Resource Manager:
 
 # mini-os-simulator: Project 2
 Beign project 2
+
+## 1. Project Description A
+- Goal: compare different scheduling algorithms
+- assume single processor
+- scheduling algo determines which process should run at each time step
+- minimize turnaround time:
+	- turnaround time: average of the real time of all the processes in the system
+	- for all process i, sum += r_i where r_i = t_i (total time: CPU time which the process running)+ waiting time (the process not running) or finish time - start time of a process i and n = the number of processes 
+
+## 2. Project Description B
+- Implement and compere: 
+	- FIFO (First-In-First-Out): Process entered first runs first
+	- SJF (Shortest Job First): Process with shorter running time runs first
+	- SRT (Shortest Remaining Time): SJF but preemptive. If new process has less running time than the remaining running time of currently running process, the new process runs first.
+	- MLF (Multi-Level Feedback Queue): n priorities, each n level has Time Slice (TS) TS_n-1 = 2*TS_n where TS_n = 1
+- Inputs: a series of arrival and total service time
+- Outputs for each algorithms:
+	- the real time r_i of each process
+	- average turnaround time
+- Output Format: T r_1 r_2 .. r_n
+	- T: average turn around time
+	- each r_i is the real time of process i
+
+## 3. Testing Procedure
+- For each algorithm:
+	- read integer pairs ar_i (arrival time) and t_i (required running time) from file input.txt on memory stick
+	- ourput results into a file name STUDENT_ID.txt to the same memory stick
+- Output flie should contain 4 separate lines of the form
+	- T r_1 r_2 .. r_n
+
+## 4. References 
+- [The Lecture Video including Testing Example](http://replay.uci.edu/public/winter2015/Bic-proj-schedA_-_20150112_122322_15.html)
+- [Official Project Description](http://www.ics.uci.edu/~bic/courses/143B/Sched-project/Description.pdf)
+- [Protocol to Follow](http://www.ics.uci.edu/~bic/courses/143B/Sched-project/Protocol.pdf)

@@ -444,13 +444,19 @@ class Manager:
 				self.RL.system.remove(p)
 				# r.waitingList.system.insert(p)
 				r.waitingList.append((p, int(units)))  # tuple of the process and units
-				q = self.RL.system.list[0]
+				try:
+					q = self.RL.system.list[0]
+				except IndexError:
+					return 'error'
 				self.scheduler(q)
 			elif p.priority=='1':
 				self.RL.user.remove(p)
 				# r.waitingList.user.insert(p)
 				r.waitingList.append((p, int(units)))  # tuple of the process and units
-				q = self.RL.user.list[0]
+				try: 
+					q = self.RL.user.list[0]
+				except IndexError:
+					return 'error'
 				self.scheduler(q)
 			else:
 				# print('Req, this is the p: '+str(p.priority))
