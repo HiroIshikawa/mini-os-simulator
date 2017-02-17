@@ -18,7 +18,7 @@ def fifo(ps):
 		turn_arounds.append(ta)
 	return turn_arounds
 
-def schdule(ps):
+def schedule(ps):
 	"""Apply each scheduling algos."""
 	scheduleds = []
 	scheduleds.append(fifo(ps))
@@ -41,7 +41,8 @@ def purse(input):
 			process[:] = []
 	# print(process)
 	# print(processes)
-	fifo_result = fifo(processes)
+	# fifo_result = fifo(processes)
 	# print(fifo_result)
 	# 
 	# report(fifo_result)
+	return processes

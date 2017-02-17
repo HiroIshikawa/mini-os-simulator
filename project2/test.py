@@ -15,7 +15,9 @@ runs = []
 
 for c in content:
 	ps = scheduler.purse(c)
-	scheduler.runs.append(ps)
+	runs.append(ps)
+
+# print(runs)
 
 results = []
 
