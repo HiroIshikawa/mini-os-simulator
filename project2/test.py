@@ -11,8 +11,18 @@ with open(input_file) as f:
 content = [x.strip() for x in content]
 content = [x.replace(" ", "") for x in content]
 
+runs = []
+
 for c in content:
-	scheduler.purse(c)
+	ps = scheduler.purse(c)
+	scheduler.runs.append(ps)
+
+results = []
+
+for run in runs:
+	results.append(scheduler.schedule(run))
+
+print(results)
 
 # for i in content:
 # 	for j in i.replace(" ", ""):
