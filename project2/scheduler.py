@@ -1,5 +1,7 @@
 import os
 
+import copy
+
 class Process:
 	"""
 	Process in self-time management strategy.
@@ -57,10 +59,10 @@ class Scheduler:
 		# stopper = 0
 		while(self.remaining_ps or self.waiting_ps or self.running_p):
 			self.elapse()
-			print(self.running_p)
-			print(self.waiting_ps)
-			print(self.remaining_ps)
-			print('')
+			# print(self.running_p)
+			# print(self.waiting_ps)
+			# print(self.remaining_ps)
+			# print('')
 			# if stopper > 10:
 			# 	break
 			# else:
@@ -77,9 +79,7 @@ class Scheduler:
 
 
 class Fifo(Scheduler):
-	"""
-	FIFO scheduling algorithm.
-	"""
+	"""FIFO scheduling algorithm."""
 
 	def elapse(self):
 		# if there's any finished process, calc turnaround time
@@ -88,38 +88,16 @@ class Fifo(Scheduler):
 				self.running_p.turnaround()
 				self.complete_ps.append(self.running_p)
 				self.running_p = None
-		# search arriving processes
-		# arriving_ps = []
 		removing_ix = 0
-		# print('len: '+str(len(self.remaining_ps)))
-		# for p in self.remaining_ps:
-		# 	print('p: '+str(p))
-		# 	print('p.arrival_t: '+str(p.arrival_t))
-		# 	print('self.time_elapsed: '+str(self.time_elapsed))
-		# 	if p.arrival_t == self.time_elapsed:
-		# 		arriving_ps.append(p)
-		# 		self.remaining_ps.pop(removing_ix)
-		# 		removing_ix = removing_ix + 1
-		# 	else:
-		# 		removing_ix = removing_ix + 1
 		for i in range(len(self.remaining_ps)):
-			# print('p: '+str(self.remaining_ps[removing_ix]))
-			# print('arrival_t: '+str(self.remaining_ps[removing_ix].arrival_t))
-			# print('self.time_elapsed: '+str(self.time_elapsed))
 			if self.remaining_ps[removing_ix].arrival_t == self.time_elapsed:
-				# arriving_ps.append(self.remaining_ps[removing_ix])
 				self.waiting_ps.append(self.remaining_ps[removing_ix])
 				self.remaining_ps.pop(removing_ix)
 			else:
 				removing_ix = removing_ix + 1
-
-
 		# presumably the coming order is the arriving time
-		# if arriving_ps:
 		if not self.running_p and self.waiting_ps:
 			self.running_p = self.waiting_ps.pop(0)
-			# for waiting_p in arriving_ps:
-			# 	self.waiting_ps.append(arriving_p)
 		
 		# elapse all the running, waiting proess
 		if self.running_p:
@@ -130,60 +108,56 @@ class Fifo(Scheduler):
 		# elapse scheduler
 		self.time_elapsed = self.time_elapsed + 1
 
+
+class Sjf(Scheduler):
+	"""Shortest-Job-First"""
+
+	def elapse(self):
+		# if there's any finished process, calc turnaround time
+		if self.running_p:
+			if self.running_p.remaining_t == 0:
+				self.running_p.turnaround()
+				self.complete_ps.append(self.running_p)
+				self.running_p = None
+		removing_ix = 0
+		for i in range(len(self.remaining_ps)):
+			if self.remaining_ps[removing_ix].arrival_t == self.time_elapsed:
+				self.waiting_ps.append(self.remaining_ps[removing_ix])
+				self.remaining_ps.pop(removing_ix)
+			else:
+				removing_ix = removing_ix + 1
+		# presumably the coming order is the arriving time
+		if not self.running_p and self.waiting_ps:
+			self.waiting_ps = sorted(self.waiting_ps, key=lambda x: x.remaining_t)
+			self.running_p = self.waiting_ps.pop(0)
 		
+		# elapse all the running, waiting proess
+		if self.running_p:
+			self.running_p.run()
+		for waiting_p in self.waiting_ps:
+			waiting_p.wait()
 
-def clean_turnarounds(tas):
-	results = []
-	tas = sorted(tas, key=lambda x: x[0])
-	for ta in tas:
-		results.append(ta[1])
-	return results
+		# elapse scheduler
+		self.time_elapsed = self.time_elapsed + 1
 
-# def fifo(ps):
-# 	"""
-# 	First-In-First-Out
-	
-# 	Run processes in order of arrivals.
-# 	"""
-# 	# accm_time = 0
-# 	# turn_arounds = []
-# 	# # sort based on arrival time
-# 	# ps = sorted(ps, key=lambda x: x[1][0])
-# 	# # naive approach, not order invariant
-# 	# for p in ps:
-# 	# 	accm_time = accm_time + p[1][1]
-# 	# 	ta = accm_time - p[1][0]
-# 	# 	pid = p[0]
-# 	# 	pid_ta = (pid, ta)
-# 	# 	turn_arounds.append(pid_ta)
-# 	# # sort the turn arounds based on the priginal pid
-# 	# turn_arounds = clean_turnarounds(turn_arounds)
-# 	return turn_arounds
+	def schedule(self):
+		# stopper = 0
+		print('in sjo schedule')
+		print(self.remaining_ps)
+		while(self.remaining_ps or self.waiting_ps or self.running_p):
+			print('elapsing..')
+			self.elapse()
+			print(self.remaining_ps)
 
-# def sjf(ps):
-# 	"""
-# 	Shortest-Job-First
 
-# 	Process with shorter running time runs first.
-# 	"""
-# 	accm_time = 0
-# 	turn_arounds = []
-# 	print(ps)
-# 	# for p in ps:
-# 	# 	accm_time = accm_time + p[1]
-# 	# 	ta = accm_time - p[0]
-# 	# 	turn_arounds.append(ta)
-# 	return turn_arounds
 
 def schedule(ps):
 	"""Apply each scheduling algos."""
 	scheduleds = []
-	print(ps)
-	for p in ps:
-		print(p.arrival_t)
-	fifo = Fifo(ps)
+	fifo = Fifo(copy.deepcopy(ps))
 	scheduleds.append(fifo.report())
-	# scheduleds.append(sjf(ps))
+	sjf = Sjf(copy.deepcopy(ps))
+	scheduleds.append(sjf.report())
 	# results.append(srt(ps))
 	# results.append(mlf(ps))
 	return scheduleds
@@ -195,22 +169,6 @@ def purse(input):
 	Input has no syntax/semantics error in it.
 	Thus, no need of error handling for input.
 	"""
-	# # print(input)
-	# processes = []
-	# process = []
-	# for i,t in enumerate(input):
-	# 	process.append(int(t))
-	# 	# print('current process: '+str(process))
-	# 	if i!=0 and i%2 != 0: 
-	# 		t_process = tuple(process)
-	# 		processes.append(t_process)
-	# 		# print('current processes: ' + str(processes))
-	# 		process[:] = []
-	# id_process_s = []
-	# for i,p in enumerate(processes):
-	# 	id_process = (i, processes[i])
-	# 	id_process_s.append(id_process)
-	# return id_process_s
 	processes = []
 	for i in range(len(input)):
 		if i%2 != 0:
@@ -223,9 +181,7 @@ def report(f, tas):
 	# for each turn arounds
 	for ta in tas:
 		T = sum(ta) / (len(ta) * 1.0)
-		# T = round(T, 2)
 		T = format(T, '.2f')
-		# f.write(str(T))
 		f.write(T)
 		f.write(' ')
 		for r in ta:
