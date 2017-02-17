@@ -3,6 +3,7 @@ from sys import argv
 import scheduler
 
 input_file = argv[1]
+output_file = argv[2]
 
 # Read text file
 with open(input_file) as f:
@@ -17,15 +18,17 @@ for c in content:
 	ps = scheduler.purse(c)
 	runs.append(ps)
 
-# print(runs)
-
-results = []
+scheduling_results = []
 
 for run in runs:
-	results.append(scheduler.schedule(run))
+	scheduling_results.append(scheduler.schedule(run))
 
-print(results)
+print(scheduling_results)
 
-# for i in content:
-# 	for j in i.replace(" ", ""):
-# 		print(j)
+out_f = open(output_file, 'w')
+
+for turnarounds in scheduling_results:
+	scheduler.report(out_f, turnarounds)
+	out_f.write('\n')
+
+out_f.close()

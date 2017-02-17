@@ -39,10 +39,18 @@ def purse(input):
 			processes.append(t_process)
 			# print('current processes: ' + str(processes))
 			process[:] = []
-	# print(process)
-	# print(processes)
-	# fifo_result = fifo(processes)
-	# print(fifo_result)
-	# 
-	# report(fifo_result)
 	return processes
+
+def report(f, tas):
+	# for each turn arounds
+	for ta in tas:
+		T = sum(ta) / (len(ta) * 1.0)
+		# T = round(T, 2)
+		T = format(T, '.2f')
+		# f.write(str(T))
+		f.write(T)
+		f.write(' ')
+		for r in ta:
+			f.write(str(r))
+			f.write(' ')
+		f.write('\n')
