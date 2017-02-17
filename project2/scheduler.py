@@ -35,6 +35,44 @@ class Process:
 		"""Compute the turn aroudn of time of this process"""
 		self.turnaround_t = self.processing_t + self.waiting_t
 
+
+class Mlf_Process(Process):
+	"""
+	Process in self-time management strategy.
+
+	Attributes:
+		pid: process id
+		arrival_t: arrival time, constant
+		processing_t: processing time, constant
+		remaining_t: remaining time
+		waiting_t: waiting time
+		turnaround_t: turn-around time
+	"""
+	def __init__(self,pid,at,pt):
+		"""Initiate a process"""
+		self.pid = pid
+		self.arrival_t = at
+		self.processing_t = pt
+		self.remaining_t = self.processing_t
+		self.waiting_t = 0
+		self.turnaround_t = 0
+		self.timeslot = 0
+		self.level = 5
+
+	def run(self):
+		"""Run this process with a unit of time slice"""
+		self.remaining_t = self.remaining_t - 1
+		self.timeslot = self.timeslot - 1
+
+	def wait(self):
+		"""Count up waiting time with a unit of time slice"""
+		self.waiting_t = self.waiting_t + 1
+
+	def turnaround(self):
+		"""Compute the turn aroudn of time of this process"""
+		self.turnaround_t = self.processing_t + self.waiting_t
+
+
 class Scheduler:
 	"""
 	Base class of scheduling algorims. 
@@ -122,6 +160,55 @@ class Sjf(Scheduler):
 		self.elapse()
 
 
+class Srt(Scheduler):
+	"""Shortest-Remaining-Time"""
+
+	def proceed(self):
+		self.check_exit()
+		self.check_entry()
+		# presumably the coming order is the arriving time
+		if self.waiting_ps:
+			self.waiting_ps = sorted(self.waiting_ps, key=lambda x: x.remaining_t)
+			if self.running_p:
+				if self.running_p.remaining_t > self.waiting_ps[0].remaining_t:
+					p = copy.deepcopy(self.running_p)
+					self.running_p = self.waiting_ps.pop(0)
+					self.waiting_ps.append(p)
+			else:
+				self.running_p = self.waiting_ps.pop(0)
+		self.elapse()
+
+
+class Mlf(Scheduler):
+	"""Multi-Level Feedback"""
+	def __init__(self, ps):
+		mlf_list = []
+		for p in ps:
+			mlf_p = Mlf_Process(p.pid, p.arrival_t, p.processing_t)
+			mlf_list.append(mlf_p)
+		self.time_elapsed = 0
+		self.running_p = None
+		self.waiting_ps = []
+		self.remaining_ps = mlf_list
+		self.complete_ps = []
+
+	def proceed(self):
+		return
+	# 	self.check_exit()
+	# 	self.check_entry()
+	# 	# presumably the coming order is the arriving time
+	# 	if self.waiting_ps:
+	# 		self.waiting_ps = sorted(self.waiting_ps, key=lambda x: x.remaining_t)
+	# 		if self.running_p:
+	# 			if self.running_p.remaining_t > self.waiting_ps[0].remaining_t:
+	# 				p = copy.deepcopy(self.running_p)
+	# 				self.running_p = self.waiting_ps.pop(0)
+	# 				self.waiting_ps.append(p)
+	# 		else:
+	# 			self.running_p = self.waiting_ps.pop(0)
+	# 	self.elapse()
+
+
 def schedule(ps):
 	"""Apply each scheduling algos."""
 	scheduleds = []
@@ -129,6 +216,10 @@ def schedule(ps):
 	scheduleds.append(fifo.report())
 	sjf = Sjf(copy.deepcopy(ps))
 	scheduleds.append(sjf.report())
+	srt = Srt(copy.deepcopy(ps))
+	scheduleds.append(srt.report())
+	mlf = Mlf(copy.deepcopy(ps))
+	scheduleds.append(mlf.report())
 	# results.append(srt(ps))
 	# results.append(mlf(ps))
 	return scheduleds
