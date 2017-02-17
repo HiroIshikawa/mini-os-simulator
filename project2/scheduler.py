@@ -56,9 +56,10 @@ class Mlf_Process(Process):
 		self.remaining_t = self.processing_t
 		self.waiting_t = 0
 		self.turnaround_t = 0
-		self.timeslot = 0
-		self.level = 5
-
+		self.max_level = 5
+		self.level = self.max_level
+		self.timeslot = 1
+		
 	def run(self):
 		"""Run this process with a unit of time slice"""
 		self.remaining_t = self.remaining_t - 1
@@ -192,21 +193,34 @@ class Mlf(Scheduler):
 		self.remaining_ps = mlf_list
 		self.complete_ps = []
 
+	def check_timeout(self):
+		# if there's any finished process, calc turnaround time
+		if self.running_p:
+			if self.running_p.timeslot == 0:
+				self.running_p.level = self.running_p.level - 1
+				self.running_p.timeslot = (self.running_p.max_level - self.running_p.level) * 2
+				self.waiting_ps.append(self.running_p)
+				self.running_p = None
+
 	def proceed(self):
-		return []
-	# 	self.check_exit()
-	# 	self.check_entry()
-	# 	# presumably the coming order is the arriving time
-	# 	if self.waiting_ps:
-	# 		self.waiting_ps = sorted(self.waiting_ps, key=lambda x: x.remaining_t)
-	# 		if self.running_p:
-	# 			if self.running_p.remaining_t > self.waiting_ps[0].remaining_t:
-	# 				p = copy.deepcopy(self.running_p)
-	# 				self.running_p = self.waiting_ps.pop(0)
-	# 				self.waiting_ps.append(p)
-	# 		else:
-	# 			self.running_p = self.waiting_ps.pop(0)
-	# 	self.elapse()
+		self.check_exit()
+		self.check_timeout()
+		self.check_entry()
+		# presumably the coming order is the arriving time
+		if self.waiting_ps:
+			# sort based on the level
+			self.waiting_ps = sorted(self.waiting_ps, key=lambda x: x.level)
+			# if there's any running process
+			if self.running_p:
+				# if self.running_p.remaining_t > self.waiting_ps[0].remaining_t:
+				# check if any higher level waiting process exists
+				if self.running_p.level < self.waiting_ps[0].level:
+					p = copy.deepcopy(self.running_p)
+					self.running_p = self.waiting_ps.pop(0)
+					self.waiting_ps.append(p)
+			else:
+				self.running_p = self.waiting_ps.pop(0)
+		self.elapse()
 
 
 def schedule(ps):
