@@ -203,13 +203,14 @@ class Mlf(Scheduler):
 				self.running_p = None
 
 	def proceed(self):
+		print('Clock: '+str(self.time_elapsed))
 		self.check_exit()
 		self.check_timeout()
 		self.check_entry()
 		# presumably the coming order is the arriving time
 		if self.waiting_ps:
 			# sort based on the level
-			self.waiting_ps = sorted(self.waiting_ps, key=lambda x: x.level)
+			self.waiting_ps = sorted(self.waiting_ps, key=lambda x: x.level, reverse=True)
 			# if there's any running process
 			if self.running_p:
 				# if self.running_p.remaining_t > self.waiting_ps[0].remaining_t:
@@ -220,6 +221,10 @@ class Mlf(Scheduler):
 					self.waiting_ps.append(p)
 			else:
 				self.running_p = self.waiting_ps.pop(0)
+		if self.running_p:
+			print("Running: "+str(self.running_p.pid))
+			print(": "+str(self.running_p.timeslot))
+			print('')
 		self.elapse()
 
 
