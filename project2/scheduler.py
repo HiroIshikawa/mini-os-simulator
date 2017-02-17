@@ -52,21 +52,40 @@ class Scheduler:
 		self.remaining_ps = ps
 		self.complete_ps = []
 
-	def elapse(self):			
-		self.time_elapsed = self.time_elapsed + 1
+	# def elapse(self):			
+	# 	self.time_elapsed = self.time_elapsed + 1
+
+	def check_exit(self):
+		# if there's any finished process, calc turnaround time
+		if self.running_p:
+			if self.running_p.remaining_t == 0:
+				self.running_p.turnaround()
+				self.complete_ps.append(self.running_p)
+				self.running_p = None
+
+	def check_entry(self):
+		removing_ix = 0
+		for i in range(len(self.remaining_ps)):
+			if self.remaining_ps[removing_ix].arrival_t == self.time_elapsed:
+				self.waiting_ps.append(self.remaining_ps[removing_ix])
+				self.remaining_ps.pop(removing_ix)
+			else:
+				removing_ix = removing_ix + 1
+
+	def elapse(self):
+		# elapse all the running, waiting proess
+		if self.running_p:
+			self.running_p.run()
+		for waiting_p in self.waiting_ps:
+			waiting_p.wait()
+		# elapse scheduler
+		self.time_elapsed = self.time_elapsed + 1		
 
 	def schedule(self):
 		# stopper = 0
 		while(self.remaining_ps or self.waiting_ps or self.running_p):
-			self.elapse()
-			# print(self.running_p)
-			# print(self.waiting_ps)
-			# print(self.remaining_ps)
-			# print('')
-			# if stopper > 10:
-			# 	break
-			# else:
-			# 	stopper = stopper + 1
+			# self.elapse()
+			self.proceed()
 
 	def report(self):
 		self.schedule()
@@ -81,74 +100,26 @@ class Scheduler:
 class Fifo(Scheduler):
 	"""FIFO scheduling algorithm."""
 
-	def elapse(self):
-		# if there's any finished process, calc turnaround time
-		if self.running_p:
-			if self.running_p.remaining_t == 0:
-				self.running_p.turnaround()
-				self.complete_ps.append(self.running_p)
-				self.running_p = None
-		removing_ix = 0
-		for i in range(len(self.remaining_ps)):
-			if self.remaining_ps[removing_ix].arrival_t == self.time_elapsed:
-				self.waiting_ps.append(self.remaining_ps[removing_ix])
-				self.remaining_ps.pop(removing_ix)
-			else:
-				removing_ix = removing_ix + 1
+	def proceed(self):
+		self.check_exit()
+		self.check_entry()
 		# presumably the coming order is the arriving time
 		if not self.running_p and self.waiting_ps:
 			self.running_p = self.waiting_ps.pop(0)
-		
-		# elapse all the running, waiting proess
-		if self.running_p:
-			self.running_p.run()
-		for waiting_p in self.waiting_ps:
-			waiting_p.wait()
-
-		# elapse scheduler
-		self.time_elapsed = self.time_elapsed + 1
+		self.elapse()
 
 
 class Sjf(Scheduler):
 	"""Shortest-Job-First"""
 
-	def elapse(self):
-		# if there's any finished process, calc turnaround time
-		if self.running_p:
-			if self.running_p.remaining_t == 0:
-				self.running_p.turnaround()
-				self.complete_ps.append(self.running_p)
-				self.running_p = None
-		removing_ix = 0
-		for i in range(len(self.remaining_ps)):
-			if self.remaining_ps[removing_ix].arrival_t == self.time_elapsed:
-				self.waiting_ps.append(self.remaining_ps[removing_ix])
-				self.remaining_ps.pop(removing_ix)
-			else:
-				removing_ix = removing_ix + 1
+	def proceed(self):
+		self.check_exit()
+		self.check_entry()
 		# presumably the coming order is the arriving time
 		if not self.running_p and self.waiting_ps:
 			self.waiting_ps = sorted(self.waiting_ps, key=lambda x: x.remaining_t)
 			self.running_p = self.waiting_ps.pop(0)
-		
-		# elapse all the running, waiting proess
-		if self.running_p:
-			self.running_p.run()
-		for waiting_p in self.waiting_ps:
-			waiting_p.wait()
-
-		# elapse scheduler
-		self.time_elapsed = self.time_elapsed + 1
-
-	def schedule(self):
-		# stopper = 0
-		print('in sjo schedule')
-		print(self.remaining_ps)
-		while(self.remaining_ps or self.waiting_ps or self.running_p):
-			print('elapsing..')
-			self.elapse()
-			print(self.remaining_ps)
-
+		self.elapse()
 
 
 def schedule(ps):
