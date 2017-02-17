@@ -7,7 +7,16 @@ def fifo(ps):
 	
 	
 	"""
-	return
+	accm_time = 0
+	turn_arounds = []
+	# sort based on arrival time
+	ps = sorted(ps, key=lambda x: x[0])
+	# naive approach, not order invariant
+	for p in ps:
+		accm_time = accm_time + p[1]
+		ta = accm_time - p[0]
+		turn_arounds.append(ta)
+	return turn_arounds
 
 def purse(input):
 	print(input)
@@ -24,5 +33,6 @@ def purse(input):
 	print(process)
 	print(processes)
 	fifo_result = fifo(processes)
+	print(fifo_result)
 	# 
 	# report(fifo_result)
