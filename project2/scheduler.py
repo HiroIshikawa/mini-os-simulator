@@ -210,7 +210,9 @@ class Mlf(Scheduler):
 		# presumably the coming order is the arriving time
 		if self.waiting_ps:
 			# sort based on the level
+			self.waiting_ps = sorted(self.waiting_ps, key=lambda x: x.pid)
 			self.waiting_ps = sorted(self.waiting_ps, key=lambda x: x.level, reverse=True)
+
 			# if there's any running process
 			if self.running_p:
 				# if self.running_p.remaining_t > self.waiting_ps[0].remaining_t:
