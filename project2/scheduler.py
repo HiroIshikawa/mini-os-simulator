@@ -193,7 +193,7 @@ class Mlf(Scheduler):
 		self.complete_ps = []
 
 	def proceed(self):
-		return
+		return []
 	# 	self.check_exit()
 	# 	self.check_entry()
 	# 	# presumably the coming order is the arriving time
