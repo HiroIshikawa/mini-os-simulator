@@ -126,13 +126,22 @@ class Scheduler:
 			# self.elapse()
 			self.proceed()
 
-	def report(self):
+	def report_turnarounds(self):
 		self.schedule()
 		results = []
 		if self.complete_ps:
 			ps = sorted(self.complete_ps, key=lambda x: x.pid)
 		for p in ps:
 			results.append(p.turnaround_t)
+		return results
+
+	def report_waittimes(self):
+		self.schedule()
+		results = []
+		if self.complete_ps:
+			ps = sorted(self.complete_ps, key=lambda x: x.pid)
+		for p in ps:
+			results.append(p.waiting_t)
 		return results
 
 
@@ -162,7 +171,10 @@ class Sjf(Scheduler):
 
 
 class Srt(Scheduler):
-	"""Shortest-Remaining-Time"""
+	"""Shortest-Remaining-Time
+
+	Preemptive version of SJF.
+	"""
 
 	def proceed(self):
 		self.check_exit()
@@ -232,17 +244,24 @@ class Mlf(Scheduler):
 
 def schedule(ps):
 	"""Apply each scheduling algos."""
-	scheduleds = []
-	fifo = Fifo(copy.deepcopy(ps))
-	scheduleds.append(fifo.report())
+
+	# initiate each schedulers
+	fifo = Fifo(copy.deepcopy(ps))	
 	sjf = Sjf(copy.deepcopy(ps))
-	scheduleds.append(sjf.report())
 	srt = Srt(copy.deepcopy(ps))
-	scheduleds.append(srt.report())
 	mlf = Mlf(copy.deepcopy(ps))
-	scheduleds.append(mlf.report())
-	# results.append(srt(ps))
-	# results.append(mlf(ps))
+
+	# 
+	scheduleds = []
+	scheduleds.append(fifo.report_turnarounds())
+	scheduleds.append(sjf.report_turnarounds())
+	scheduleds.append(srt.report_turnarounds())
+	scheduleds.append(mlf.report_turnarounds())
+
+	scheduleds.append(fifo.report_waittimes())
+	scheduleds.append(sjf.report_waittimes())
+	scheduleds.append(srt.report_waittimes())
+	scheduleds.append(mlf.report_waittimes())	
 	return scheduleds
 
 def purse(input):
@@ -256,7 +275,7 @@ def purse(input):
 	for i in range(len(input)):
 		if i%2 != 0:
 			pid = i/2
-			p = Process(pid,int(input[i-1]),int(input[i]))
+			p = Process(pid,input[i-1],input[i])
 			processes.append(p)
 	return processes
 
