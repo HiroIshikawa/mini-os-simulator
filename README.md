@@ -289,4 +289,12 @@ Beign project 2
 - To make this workable, we break virtual memory into chunks called pages; a typical page size is four kilobytes.
 - We also break RAM into page frames, each the same size as a page, ready to hold any page of virtual memory.
 - The system also maintains a page table, stored in RAM, which is an array of entries, one for each page, storing information about the page
+
 ![alt tag](https://cloud.githubusercontent.com/assets/1572847/23149627/2cc123bc-f7a2-11e6-87f8-fe8ee69ddc6e.png)
+
+- The size of one VM is 15 bits long, which 32k bytes.
+	- 8 pages / 1 VM * 4k bytes / page = 32k bytes / 1 VM
+- the RAM's page table is correspondants of the virtual memory
+	- The data of page 0 in VM is stored in the frame 2 in RAM
+	- The data of page 2 in VM is stored in the frame 3 in RAM
+	- The data of page 4 in VM is stored in the frame 1 in RAM
