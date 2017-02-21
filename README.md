@@ -273,3 +273,20 @@ Beign project 2
 - [The Lecture Video including Testing Example](http://replay.uci.edu/public/winter2015/Bic-proj-schedA_-_20150112_122322_15.html)
 - [Official Project Description](http://www.ics.uci.edu/~bic/courses/143B/Sched-project/Description.pdf)
 - [Protocol to Follow](http://www.ics.uci.edu/~bic/courses/143B/Sched-project/Protocol.pdf)
+
+
+
+# mini-os-simulater: Project 3
+
+## 1. Assignment Outline
+- VM using segmentatoin and paging
+- managin segment and page tables in a simulated main memory 
+- It accepts Virtual Addresses and translates them into Physical Addresses
+- It utilizes translation look-aside buffeer (TLB) to make the process more efficient
+
+## 2. [Virtual Memory Basics Note](http://www.toves.org/books/vm/)
+- The system stores the official copy of memory on disk and caches only the most frequently used data in RAM.
+- To make this workable, we break virtual memory into chunks called pages; a typical page size is four kilobytes.
+- We also break RAM into page frames, each the same size as a page, ready to hold any page of virtual memory.
+- The system also maintains a page table, stored in RAM, which is an array of entries, one for each page, storing information about the page
+![alt tag](https://cloud.githubusercontent.com/assets/1572847/23149627/2cc123bc-f7a2-11e6-87f8-fe8ee69ddc6e.png)
