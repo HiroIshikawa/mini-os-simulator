@@ -284,7 +284,7 @@ Beign project 2
 - It accepts Virtual Addresses and translates them into Physical Addresses
 - It utilizes translation look-aside buffeer (TLB) to make the process more efficient
 
-## 2. [Virtual Memory Basics Note](http://www.toves.org/books/vm/)
+## - [Virtual Memory Paging Basics Note](http://www.toves.org/books/vm/)
 ### Intro
 - The system stores the official copy of memory on disk and caches only the most frequently used data in RAM.
 - To make this workable, we break virtual memory into chunks called pages; a typical page size is four kilobytes.
@@ -310,7 +310,7 @@ Beign project 2
 	3. IF page is not in the frame in RAM, it initiates the page fault.
 	4. ELSE, CPU loads from the memory address offs within page frame f
 
-### Parge Table Format
+### Page Table Format
 - A Page Table contains multiple page entries
 - Each entry, depending on its design, contains specific bits for each purpose.
 	- Load Bit: a bit to represents wthether the page is currently loaded onto memory or not
@@ -323,4 +323,27 @@ Beign project 2
 	IF it's 1, then it indicates the page recently accesessed since preivous prediodic checking mentioned above.
 	OTHERWISE, it has not been utilized so it might be good to empty the page from frame to allocate space for another page.
 
+## - [VM Segmentation with Paging Note](http://lass.cs.umass.edu/~shenoy/courses/fall08/lectures/Lec16.pdf)
+### Intro
+- Segementation of the techniqeu to build a subset of VM addresses to correspond logically with user's system usage
+- Component: Segmentation Table: Entries which each entry contains
+	- Base Address
+	- Length of segment
+	- Protection Info
+- System generates virtual addressses whose upper order bits are a segment number
+- Now the VM space is treated as a collection of segments of arbitraty sizes
+	- indicating the segment size differ based on the usage of the segement (global var, stack, heap etc..)
+- Physical Memory (PM) is treated as a sequence of fixed size page frames.
+- Segments are typicalyl larget than Page Frames
+
+### Addresses in Segmented Paging System
+- VM becomes a sequece of bits to represent
+	- a segment number (which segement?)
+		- this yeilds the base address of the particular page table for that segment
+	- a page within the segment (which page in the segment?)
+		- can be indexed by the page number of the rest of bits in the VM
+	- an offset within the page (which actual PM in the page?)
+		- the offset point to the requested physical address finally.
+
+![alt tag](https://cloud.githubusercontent.com/assets/1572847/23151605/220ee990-f7b1-11e6-8c3d-138039818b26.png)
 
