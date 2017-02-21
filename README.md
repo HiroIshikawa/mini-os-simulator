@@ -284,6 +284,20 @@ Beign project 2
 - It accepts Virtual Addresses and translates them into Physical Addresses
 - It utilizes translation look-aside buffeer (TLB) to make the process more efficient
 
+## 2. Segmentation with Paging
+![alt tag](https://cloud.githubusercontent.com/assets/1572847/23151767/2dcc602c-f7b2-11e6-9634-98ddedec7c1c.png)
+ 
+## 3. Organization of the VM system
+- Single Process -> Single Segmentation Table (ST)
+- Each entry of ST points to a Paging Table (PT)
+- Each entry of PT points to a program/data page
+- Virtual Addrress is an integer ( 32 bits ), divided into s, p, w
+	- |s| = 9: ST size is 512 words (int)
+	- |p| = 10: PT size is 1024 words
+	- |w| = 9: page size si 512 words (offset)
+	- The leading 4 bits of VA is unused
+
+
 ## - [Virtual Memory Paging Basics Note](http://www.toves.org/books/vm/)
 ### Intro
 - The system stores the official copy of memory on disk and caches only the most frequently used data in RAM.
