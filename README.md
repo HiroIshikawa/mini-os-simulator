@@ -285,6 +285,7 @@ Beign project 2
 - It utilizes translation look-aside buffeer (TLB) to make the process more efficient
 
 ## 2. [Virtual Memory Basics Note](http://www.toves.org/books/vm/)
+### Intro
 - The system stores the official copy of memory on disk and caches only the most frequently used data in RAM.
 - To make this workable, we break virtual memory into chunks called pages; a typical page size is four kilobytes.
 - We also break RAM into page frames, each the same size as a page, ready to hold any page of virtual memory.
@@ -292,9 +293,34 @@ Beign project 2
 
 ![alt tag](https://cloud.githubusercontent.com/assets/1572847/23149627/2cc123bc-f7a2-11e6-87f8-fe8ee69ddc6e.png)
 
+### Example
 - The size of one VM is 15 bits long, which 32k bytes.
 	- 8 pages / 1 VM * 4k bytes / page = 32k bytes / 1 VM
 - the RAM's page table is correspondants of the virtual memory
 	- The data of page 0 in VM is stored in the frame 2 in RAM
 	- The data of page 2 in VM is stored in the frame 3 in RAM
 	- The data of page 4 in VM is stored in the frame 1 in RAM
+
+### Address Translation
+- From CPU, it asks utilizing a data referencing VM, not actual RAM PA (Physical Address)
+- Since VM does not contain the actual data, we need to translate the VM to PM
+- Procedure:
+	1. CPU breaks the adress into the first three bits, which represents a particular page (2^3 = 8) and the rest of twelve bits, which represents giving the offset offs within the page.
+	2. CPU looks into the page table and try to fetch the corresponding frame
+	3. IF page is not in the frame in RAM, it initiates the page fault.
+	4. ELSE, CPU loads from the memory address offs within page frame f
+
+### Parge Table Format
+- A Page Table contains multiple page entries
+- Each entry, depending on its design, contains specific bits for each purpose.
+	- Load Bit: a bit to represents wthether the page is currently loaded onto memory or not
+	- Frame Bits: bits to locate which page frame contains the page.
+	- Dirty Bit: a bit specifies whether the page in memory has been altered since being loaded onto memory.
+	This is useful to reduce the cost of writing back to disk when the page is removed from the memory.
+	This makes sure it wirte back to the disk only if the page is updated since it has been loaded onto memory.
+	- Referenced Bit: this is set as 1 whenever the page is accessed.
+	OS periodically visits this bit to see whether it's 1 and set it 0.
+	IF it's 1, then it indicates the page recently accesessed since preivous prediodic checking mentioned above.
+	OTHERWISE, it has not been utilized so it might be good to empty the page from frame to allocate space for another page.
+
+
