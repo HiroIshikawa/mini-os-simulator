@@ -258,10 +258,10 @@ def schedule(ps):
 	scheduleds.append(srt.report_turnarounds())
 	scheduleds.append(mlf.report_turnarounds())
 
-	scheduleds.append(fifo.report_waittimes())
-	scheduleds.append(sjf.report_waittimes())
-	scheduleds.append(srt.report_waittimes())
-	scheduleds.append(mlf.report_waittimes())	
+	# scheduleds.append(fifo.report_waittimes())
+	# scheduleds.append(sjf.report_waittimes())
+	# scheduleds.append(srt.report_waittimes())
+	# scheduleds.append(mlf.report_waittimes())	
 	return scheduleds
 
 def purse(input):
