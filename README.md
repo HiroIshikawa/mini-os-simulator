@@ -296,6 +296,41 @@ Beign project 2
 	- |p| = 10: PT size is 1024 words
 	- |w| = 9: page size si 512 words (offset)
 	- The leading 4 bits of VA is unused
+- Each Segmentation Table (ST) entry have three types of entry:
+    - -1: PT is currently not resident in PM (Page Fault)
+    - 0: corresponding PT does not exist
+        - read: error; write: create a blank PT
+    - f: PT starts at physical address f (address, not frame #)
+- Each Page Table entry have three types of entry:
+    - -1: page is currently not resident in PM (Page Fault)
+    - 0: corresponding page does not exist
+        - read: error; write: create a blank page
+    - f: page starts at physical address f
+
+## 4. Organization of Physical Memory (PM)
+- PM is represented as an array of integers
+    - each corresponds to one addressable memory word
+- PM is devided into frames of size 512 words (integers)
+    - consequently, ST occupies one frame
+    - each PT occupies two (consecutive) frames
+    - each program/data page occupies one frame
+- PA consists of 1024 frames (=array of 524,288 int, = 2MB)
+    - consequently the size of PA is 19 bit
+- ST always resides in frame 0 and is never paged out
+- A page may be placed into any free frame
+- A PT may be placed into any pair of consecutive free frames
+
+![alt tag](https://cloud.githubusercontent.com/assets/1572847/23592573/e70feef0-01b7-11e7-80f6-ed46a44bdb2f.png)
+
+- PM[s] accesses the ST
+    - if the entry is 0 > it points to a resident PT
+- PM[PM[s]+p] accesses the PT
+    - if the entry is 0 > it points to a resident page
+- All ST/PT entries are multiples of 512 (frame size) 
+- A bit map is used to keep track of free/occupied frames
+- The bit map consists of 1024 bits (one per frame)
+- Can be implemented as an array of 32 ints
+- Normally this would be mainteined inside the PM but in this projects, it may be implemented as a separate data structure.
 
 
 ## - [Virtual Memory Paging Basics Note](http://www.toves.org/books/vm/)
