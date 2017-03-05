@@ -332,6 +332,23 @@ Beign project 2
 - Can be implemented as an array of 32 ints
 - Normally this would be mainteined inside the PM but in this projects, it may be implemented as a separate data structure.
 
+## 5. Address Translation Process
+- Break each VA into s, p, w
+- For read access:
+    - If ST or PT entry is -1 then output "pf" (page fault) and contnue with next VA
+    - If ST or PT entry is 0 then output "error" and continue with next VA
+    - Otherwise output PA = PM[ PM[s] + p ] + w
+- For write access:
+    - If ST or PT entry is -1 then output "pf"
+    - If ST entry is 0 then
+         - allocate new blank PT (all zeros)
+         - update the ST entry accordingly
+         - continue with the translation process
+    - If PT entry is 0 then
+         - create a new blank page
+         - update the PT entry accordingly
+         - continue with the translation process
+    - Otherwise output the corresponding PA
 
 ## - [Virtual Memory Paging Basics Note](http://www.toves.org/books/vm/)
 ### Intro
