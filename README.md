@@ -350,6 +350,42 @@ Beign project 2
          - continue with the translation process
     - Otherwise output the corresponding PA
 
+## 6. Initialization of PM
+- Read init file (in format as below)
+    - s_1 f_1 s_2 f_2 ... s_n f_n
+    - p_1 s_1 f_1 p_2 s_2 f_2 ... p_m s_m f_m
+- s_i f_i: PT of segment s_i starts at address f_i
+    - if f_i = -1 then the corresponding PT is not resident
+    - ie.
+        - 15 512: PT of seg 15 starts at address 512
+        - 9 -1: PT of seg 9 is not resident
+- p_j s_j f_j: page p_j of segment s_j starts at address f_j
+    - if f_i = -1 then the corresponding page is not resident
+    - ie.
+        - 7 13 4096: page 7 of seg 13 starts at 4096
+        - 8 13 -1: page 8 of seg 13 is not resident
+- Initialization process:
+    - Reads s_i f_i pairs and make corresponding entries in ST's
+    - Reads p_j s_j f_j triples and make entries in PT's 
+    - Create bitmap to show which frames are free
+- Note: each f is a PA, not just a frame number
+
+## 7. Running the VM Translation
+- Read input file:
+    - o_1 VA_1 o_2 VA_2 ... o_n VA_n
+    - each o_i is either 0 (read) or 1 (write)
+    - each VA_i is a positive integer (virtual address)
+- For each o_i VA_i pair attempts to translate VA into PA
+- Write results into an output file
+
+## 8. The Translation Lookside Buffer (TLB) 
+![alt tag](https://cloud.githubusercontent.com/assets/1572847/23639403/702a8f62-029c-11e7-8453-4c5d189c6a99.png)
+
+- Size: 4 lines
+- LRU (Least Recently Used): int 0:3, 0: least recently accessed
+- s,p: int  
+- f: int (starting frame address, not frame #)
+
 ## - [Virtual Memory Paging Basics Note](http://www.toves.org/books/vm/)
 ### Intro
 - The system stores the official copy of memory on disk and caches only the most frequently used data in RAM.
