@@ -443,7 +443,7 @@ It then reads another input file and, for each VA, attempts to translate it into
 It outputs the result of each address translation into a new file.
 - Submit docs
 - Schedule testing
-
+- Follow [the protocol](http://www.ics.uci.edu/~bic/courses/143B/VM-TLB-Project/protocol.pdf)
 
 
 ## - [Virtual Memory Paging Basics Note](http://www.toves.org/books/vm/)
