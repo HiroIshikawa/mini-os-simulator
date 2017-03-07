@@ -382,9 +382,68 @@ Beign project 2
 ![alt tag](https://cloud.githubusercontent.com/assets/1572847/23639403/702a8f62-029c-11e7-8453-4c5d189c6a99.png)
 
 - Size: 4 lines
-- LRU (Least Recently Used): int 0:3, 0: least recently accessed
+- LRU (Least Recently Used): int 0:3
+- 0: least recently accessed
+- 3: most recently accessed
+- 0 should be replaced (victim), 3 should not
 - s,p: int  
 - f: int (starting frame address, not frame #)
+
+## 9. Running Translations with TLB
+- Break VA into sp and w
+- Search TLB for match on sp
+- if TLB hit
+    - use f from TLB to form PA = f+w
+    - update LRU fields as follow:
+        - assume the match is in the line k then:
+        - decrement all the LRU values greater than LRU[k] by 1
+        - set LRU[k] = 3
+- if TLB miss
+    - resolve VA as before (breaking VA into sp and w, search TLB for match on sp)
+    - in case of error or page fault, no change to TLB
+    - if a valid PA is derived then TLB is updated as follows:
+        - select line with LRU = 0 and set this LRU = 3
+        - replace sp field of that line with the new sp value
+        - replace f field of that line with PM[PM[s]+p]
+        - decrement all other LRU values by 1
+
+## 10. Bitmap
+- Implemented for PM management (keep tracking free/occupied frames)
+- BM size : # of bits needed = # of ldisk blocks
+- represent BM as an array of int (32 bits each): BM[n]
+- How to set, reset, and search for bits in BM?
+- prepare a mask array: MASK[32]
+    - diagonal contains "1", all other fields are "0"
+    - use bit operations (bitwise or/and) to manipulate bits
+- MASK (assume 16 bits only; actually 32 bits in implementation)
+[alt tag](https://cloud.githubusercontent.com/assets/1572847/23641766/45954e7c-02ab-11e7-89e6-924a8b56f07d.png)
+- to Set: bit i of BM[j] to "1":
+    - BM[j] = BM[j] | MASK[i]
+- How to create MASK[32]
+    - MASK[31] = 1
+    - MASK[i] = MASK[i+1] <<
+- to Set: bit i of BM[j] to "0":
+    - create MASK2 where MASK2[i] = ~MASK[i]
+    - e.g.,0010 0000 0000 0000 -> 1101 1111 1111 1111
+    - BM[j] = BM[j] & MASK2[i]
+- to search for a bit equal to "0" in BM:
+    - for (i=0;...)  /* search BM from the beginning
+        - for (j=0;...)  /* search each bit in BM[i] for "0"
+             - test = BM[i] & MASK[j]
+             - if (test==0) then
+                  - bit j of MB[i] is "0";
+                  - stop search
+
+## 11. Summary of Tasks
+- Design and implement a VM memory system using segmentation and paging
+- Design and implement a TLB to speed up the address translation process
+- Design and implement a driver program that initialize the system for a given file.
+It then reads another input file and, for each VA, attempts to translate it into corresponding PA.
+It outputs the result of each address translation into a new file.
+- Submit docs
+- Schedule testing
+
+
 
 ## - [Virtual Memory Paging Basics Note](http://www.toves.org/books/vm/)
 ### Intro
