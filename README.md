@@ -347,8 +347,9 @@ Beign project 2
     - If PT entry is 0 then
          - create a new blank page
          - update the PT entry accordingly
+         - output the newly generated PA
          - continue with the translation process
-    - Otherwise output the corresponding PA
+    - Otherwise output the corresponding PA: PA = PM[PM[s]+p]+w
 
 ## 6. Initialization of PM
 - Read init file (in format as below)
