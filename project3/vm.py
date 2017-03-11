@@ -1,15 +1,4 @@
-# data structures
 
-# the PM 1024 frames * 512 words / frame = 524,288 integers
-# initialize fixed sized array of 524,288 integers with the value of 0
-pm = [0]*524288
-
-PM_FRAME_SIZE = 512
-PM_NUM_FRAME = 1024
-
-PM_FRAME_PER_ST = 1
-PM_FRAME_PER_PT = 2
-PM_FRAME_PER_PAGE = 1
 
 class BitMap():
 	"""
@@ -57,7 +46,65 @@ class BitMap():
 			print 'List index out of range. Nothing changed'
 	
 	def print_bin(self):
+		"""Print the bitmap in binary format for integer data type (32bits)"""
 		print 'bitmap:'
 		for e in self.bitmap:
 			print '{0:032b}'.format(e),
 
+class Frame():
+	"""
+	Representation of the frame in physical memory
+
+	Attributes:
+		entries: physical memory address assigned in the particular frame
+	"""
+
+	def __init__(self, size=512):
+		self.entries = [0]*size
+
+class PhysicalMemory():
+	"""
+	Physical Memory (PM) implementation.
+	
+	Attributes:
+		num_frames: number of frames
+		frame_size: size of each frame
+		st_size: how many frames a Segmentation Table occupies in physical mem
+		pt_size: how many frmaes a Page Table occupies in physical mem
+		pg_size: how many frames a page occupies in physical memory
+		pm: array of the representationo of physical memory with configuration above
+		bitmap: bitmap manages whether a frame is free/occupied
+	"""
+	def __init__(self, num_frames=1024, frame_size=512, st_size=1, pt_size=2, pg_size=1):
+		self.num_frames = num_frames
+		self.frame_size = frame_size
+		self.st_size = 1
+		self.pt_size = 2
+		self.pg_size = 1
+		self.pm = [None]*num_frames  # 1024 frames * 512 words / frame = 524,288 ints
+		self.pm[0] = Frame()  # the sgmentation table resides [0] always
+		self.bitmap = BitMap()
+		self.bitmap.occupy(0)  # register the ocuupation of [0]
+
+class SegmentationTable:
+	"""
+	Segmentation Table implementation
+
+	Attributes:
+		entries: each entry points to pagin table
+	"""
+
+	def __init__(self, st_size=512):
+		self.st_size = st_size
+		self.entries = [0]*self.st_size
+
+class VirtualMemory():
+	"""
+	Virtual Memory (VM)) impolementation.
+	
+	Attributes:
+		st: segmentation table
+		pt: paging table
+	"""
+	def __init__(self):
+		self.vm = [0]*512

@@ -7,4 +7,4 @@
 def init_VM():
 	# first line: s_1 f_1 ... s_n f_n
 	# segmentation index and the physical address
-
+	
