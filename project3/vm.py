@@ -51,22 +51,24 @@ class BitMap():
 		return self.bitmap[ith+offset]
 
 	def first_fit_one(self):
+		# print self.bitmap
+		# print self.mask_0
 		for i,e in enumerate(self.bitmap):
-			for j,b in enumerate(mask_1):
-				if e & b:
+			for j,b in enumerate(self.mask_1):
+				if e & b == 0:
 					return (i*self.block_size) + j
 		return None
 
 	def first_fit_two(self):
 		for i,e in enumerate(self.bitmap):
-			for j,b in enumerate(mask_1):
-				if e & b:
-					if j == len(mask_1)-1:
+			for j,b in enumerate(self.mask_1):
+				if e & b == 0:
+					if j == len(self.mask_1)-1:
 						if not i == self.num_blocks-1:
-							if bitmap[i+1] & mask_1[0]:
+							if self.bitmap[i+1] & self.mask_1[0] == 0:
 								return (i*self.block_size) + j
 					else:
-						if e & mask_1[j+1]:
+						if e & self.mask_1[j+1] == 0:
 							return (i*self.block_size) + j
 
 
@@ -190,84 +192,131 @@ def purse_va(va):
 	pt   = int(va[13:23],2)
 	# pg   = va[23:32]
 	pg   = int(va[23:32],2)
-	print lead, st, pt, pg
+	print 'ST:{} PT:{} PG:{} |'.format(st, pt, pg),
 	return st, pt, pg
 
+def read_vm(pm, va_outputs, st, pt, pg):
+	print 'reading...',
+	if pm.frames[0].entries[st] == -1:
+		# print 'pf',
+		va_outputs.append('pf')
+	elif pm.frames[0].entries[st] == 0:
+		# print 'err',
+		va_outputs.append('err')
+	else:
+		print 'Theres corresponding entry in st: {}|'.format(pm.frames[0].entries[st]),
+		pt_id = pm.frames[0].entries[st] / pm.frame_size
+		print 'The page table resides at frame No.{}|'.format(pt_id),
+		print 'The page table entry at pt[{}]: {}|'.format(pt,pm.frames[pt_id].entries[pt]),
+		if pm.frames[pt_id].entries[pt] == -1:
+			# print 'pf',
+			va_outputs.append('pf')
+		elif pm.frames[pt_id].entries[pt] == 0:
+			# print 'err',
+			va_outputs.append('err')
+		else:
+			# print pm.frames[pt_id].entries[pt], pg 
+			pa = pm.frames[pt_id].entries[pt] + pg
+			# print pa,
+			va_outputs.append(str(pa))
+
+def write_vm(pm, va_outputs, st, pt, pg):
+	if pm.frames[0].entries[st] == -1:
+		# print 'pf',
+		va_outputs.append('pf')
+		return
+	elif pm.frames[0].entries[st] > 0:
+		pt_id = pm.frames[0].entries[st] / pm.frame_size
+		if pm.frames[pt_id].entries[pt] == -1:
+			# print 'pf',
+			va_outputs.append('pf')
+			return
+	else:
+		pass
+	# pt_id = pm.frames[0].entries[st] / pm.frame_size
+	# if ST entry is 0
+	if pm.frames[0].entries[st] == 0:
+		print 'ST is 0 |', 
+		# check if there's allocatable frame for a Page Table
+		available_frame = pm.bitmap.first_fit_two()
+		if available_frame:  # if so, make a new paging table
+			print 'Theres available frame at {} |'.format(available_frame),
+			pm.frames[available_frame] = PagingTable()
+			for i in range(pm.pt_size):  # register it in bitmap
+				pm.bitmap.occupy(available_frame+i)
+			pm.frames[0].entries[st] = available_frame*pm.frame_size
+			print 'the PT address in the ST {} |'.format(pm.frames[0].entries[st]),
+		else:  # if there's no available frame, no more process
+			# print 'No available for the PT'
+			pass
+		# if PT entry is 0
+		# print 'The pt_id: {}'.format(pt_id)
+		# print 'The entry of PT at pt: {}'.format(pm.frames[pt_id].entries[pt]),
+		pt_id = pm.frames[0].entries[st] / pm.frame_size
+		if pm.frames[available_frame].entries[pt] == 0:
+			print 'The entry of PT is 0|',
+			# check if there's allocatable frame for a Page
+			available_frame = pm.bitmap.first_fit_one()
+			print 'The available frame for new Page is at: {}'.format(available_frame),
+			if available_frame:  # if so, make a new page
+				pm.frames[available_frame] = Page()
+				for i in range(pm.pg_size):  # register it in bitmap
+					pm.bitmap.occupy(available_frame+i)
+				pm.frames[pt_id].entries[pt] = available_frame*pm.frame_size
+				print 'The newly added address in the PT[{}] at pt [{}]: {}|'.format(pt_id,pt,pm.frames[pt_id].entries[pt]),
+				# print the newly generated: PA = PM[ PM[s] + p ] + w
+				pa = pm.frames[pt_id].entries[pt] + pg
+				# print pa,
+				va_outputs.append(str(pa))
+			else:
+				# print 'No avaliable for the Page'
+				pass
+		else:  # there's exist a page in pagetable
+			# otherwise output the existing PA: PA = PM[ PM[s] + p ] + w
+			pa = pm.frames[pt_id].entries[pt] + pg
+			# print pa,
+			va_outputs.append(str(pa))
+	else:
+		pt_id = pm.frames[0].entries[st] / pm.frame_size
+		if pm.frames[pt_id].entries[pt] == 0:
+			print 'The entry of PT is 0|',
+			# check if there's allocatable frame for a Page
+			available_frame = pm.bitmap.first_fit_one()
+			print 'The available frame for new Page is at: {}'.format(available_frame),
+			if available_frame:  # if so, make a new page
+				pm.frames[available_frame] = Page()
+				for i in range(pm.pg_size):  # register it in bitmap
+					pm.bitmap.occupy(available_frame+i)
+				pm.frames[pt_id].entries[pt] = available_frame*pm.frame_size
+				print 'The newly added address in the PT[{}] at pt [{}]: {}|'.format(pt_id,pt,pm.frames[pt_id].entries[pt]),
+				# print the newly generated: PA = PM[ PM[s] + p ] + w
+				pa = pm.frames[pt_id].entries[pt] + pg
+				# print pa,
+				va_outputs.append(str(pa))
+			else:
+				# print 'No avaliable for the Page'
+				pass
+		else:			
+			pa = pm.frames[pt_id].entries[pt] + pg
+			# print pa,
+			va_outputs.append(str(pa))
+
+
 def translate_vm(pm, va_inputs):
+	va_outputs = []
 	for va_input in va_inputs:
 		op = va_input[0]
 		va = va_input[1]
 		st, pt, pg = purse_va(va)
 		if op == 0:
-			#read
-			if pm.frames[0].entries[st] == -1:
-				print 'pf',
-			elif pm.frames[0].entries[st] == 0:
-				print 'err',
-			else:
-				pt_id = pm.frames[0].entries[st] / pm.frame_size
-				if pm.frames[pt_id].entries[pt] == -1:
-					print 'pf',
-				elif pm.frames[pt_id].entries[pt] == 0:
-					print 'err',
-				else:
-					print pm.frames[pt_id].entries[pt], pg 
-					pa = pm.frames[pt_id].entries[pt] + pg
-					print pa,
+			read_vm(pm, va_outputs, st, pt, pg)
 		elif op == 1:
-			# write
-			# when new allocation rquird, first-fit is fine
-			# the choice of algorithms should not affect the correctness of the program
-			if pm.frames[0].entries[st] == -1:
-				print 'pf',
-			if pm.frames[0].entries[st] > 0:
-				pt_id = pm.frames[0].entries[st] / pm.frame_size
-				if pm.frames[pt_id].entires[pt] == -1:
-					print 'pf'
-			pt_id = pm.frames[0].entries[st] / pm.frame_size
-			# if ST entry is 0
-			if pm.frames[0].entries[st] == 0:
-				# check if there's allocatable frame for a Page Table
-				available_frame = pm.bitmap.first_fit_two()
-				if available_frame:  # if so, make a new paging table
-					pm.frames[available_frame] = PagingTable()
-					for i in range(pm.pt_size):  # register it in bitmap
-						pm.bitmap.occupy(pt_id+i)
-					pm.frames[0].entries[st] = available_frame*pm.frame_size
-				else:  # if there's no available frame, no more process
-					print 'No available for the PT'
-				# if PT entry is 0
-				if pm.frames[pt_id].entires[pt] == 0:
-					# PA = PM[ PM[s] + p ] + w
-					# check if there's allocatable frame for a Page
-					available_frame = pm.bitmap.first_fit()
-					if available_frame:  # if so, make a new page
-						pm.frames[available_frame] = Page()
-						for i in range(pm.pg_size):  # register it in bitmap
-							pm.bitmap.occupy()
-						pm.frames[pt_id].entries[pt] = available_frame*pm.frame_size
-					else:
-						print 'No avaliable for the Page'
-					# find the alocatable frame, 
-					# translate it into address format, 
-					# register it in corresponding pt entry
-				else:
-
-
-
-			# 	if pm.frames[pt_id].entries[pt] == -1:
-			# 		print 'pf',
-			# 	elif pm.frames[pt_id].entries[pt] == 0:
-			# 		print 'err',
-			# 	else:
-			# 		print pm.frames[pt_id].entries[pt], pg 
-			# 		pa = pm.frames[pt_id].entries[pt] + pg
-			# 		print pa,
-
-			pass
+			write_vm(pm, va_outputs, st, pt, pg)
 		else:
 			pass
 		print ''
+	pm.bitmap.print_bin()
+	return va_outputs
 
 
 

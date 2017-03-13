@@ -4,6 +4,8 @@ import vm
 
 input_file1 = argv[1]
 input_file2 = argv[2]
+output_file1 = argv[3]
+output_file2 = argv[4]
 
 with open(input_file1) as f:
 	lines = f.readlines()
@@ -51,4 +53,15 @@ for i in range(len(va_translate)):
 
 # print va_translate_pairs
 
-vm.translate_vm(pm, va_translate_pairs)
+outputs = vm.translate_vm(pm, va_translate_pairs)
+
+print outputs
+
+# output the result without TLB
+with open(output_file1, 'w') as f:
+	# out_f = open(output_file1, 'w')
+	for output in outputs:
+		f.write(output)
+		f.write(' ')
+	f.close()
+
