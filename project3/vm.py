@@ -154,7 +154,8 @@ def initialize_pm(st_input, pt_input):
 		try:
 			pm.frames[0].entries[st_pair[0]] = st_pair[1]
 		except IndexError:
-			print 'Out of bounds for the ST size (0-511)'
+			pass
+			# print 'Out of bounds for the ST size (0-511)'
 		st_id = (pm.frames[0].entries[st_pair[0]] / pm.frame_size)
 		if not pm.bitmap.resides(st_id) > 0:  # check if the frame is allocatable
 			pm.frames[st_id] = PagingTable()
@@ -177,7 +178,7 @@ def initialize_pm(st_input, pt_input):
 						pm.bitmap.occupy(pt_id+i)  # make sure the residesnts registered
 	print pm.frames[4].entries
 
-	pm.bitmap.print_bin()
+	# pm.bitmap.print_bin()
 	return pm
 
 def purse_va(va):
@@ -192,11 +193,11 @@ def purse_va(va):
 	pt   = int(va[13:23],2)
 	# pg   = va[23:32]
 	pg   = int(va[23:32],2)
-	print 'ST:{} PT:{} PG:{} |'.format(st, pt, pg),
+	# print 'ST:{} PT:{} PG:{} |'.format(st, pt, pg),
 	return st, pt, pg
 
 def read_vm(pm, va_outputs, st, pt, pg):
-	print 'reading...',
+	# print 'reading...',
 	if pm.frames[0].entries[st] == -1:
 		# print 'pf',
 		va_outputs.append('pf')
@@ -204,10 +205,10 @@ def read_vm(pm, va_outputs, st, pt, pg):
 		# print 'err',
 		va_outputs.append('err')
 	else:
-		print 'Theres corresponding entry in st: {}|'.format(pm.frames[0].entries[st]),
+		# print 'Theres corresponding entry in st: {}|'.format(pm.frames[0].entries[st]),
 		pt_id = pm.frames[0].entries[st] / pm.frame_size
-		print 'The page table resides at frame No.{}|'.format(pt_id),
-		print 'The page table entry at pt[{}]: {}|'.format(pt,pm.frames[pt_id].entries[pt]),
+		# print 'The page table resides at frame No.{}|'.format(pt_id),
+		# print 'The page table entry at pt[{}]: {}|'.format(pt,pm.frames[pt_id].entries[pt]),
 		if pm.frames[pt_id].entries[pt] == -1:
 			# print 'pf',
 			va_outputs.append('pf')
@@ -240,12 +241,12 @@ def write_vm(pm, va_outputs, st, pt, pg):
 		# check if there's allocatable frame for a Page Table
 		available_frame = pm.bitmap.first_fit_two()
 		if available_frame:  # if so, make a new paging table
-			print 'Theres available frame at {} |'.format(available_frame),
+			# print 'Theres available frame at {} |'.format(available_frame),
 			pm.frames[available_frame] = PagingTable()
 			for i in range(pm.pt_size):  # register it in bitmap
 				pm.bitmap.occupy(available_frame+i)
 			pm.frames[0].entries[st] = available_frame*pm.frame_size
-			print 'the PT address in the ST {} |'.format(pm.frames[0].entries[st]),
+			# print 'the PT address in the ST {} |'.format(pm.frames[0].entries[st]),
 		else:  # if there's no available frame, no more process
 			# print 'No available for the PT'
 			pass
@@ -257,13 +258,13 @@ def write_vm(pm, va_outputs, st, pt, pg):
 			print 'The entry of PT is 0|',
 			# check if there's allocatable frame for a Page
 			available_frame = pm.bitmap.first_fit_one()
-			print 'The available frame for new Page is at: {}'.format(available_frame),
+			# print 'The available frame for new Page is at: {}'.format(available_frame),
 			if available_frame:  # if so, make a new page
 				pm.frames[available_frame] = Page()
 				for i in range(pm.pg_size):  # register it in bitmap
 					pm.bitmap.occupy(available_frame+i)
 				pm.frames[pt_id].entries[pt] = available_frame*pm.frame_size
-				print 'The newly added address in the PT[{}] at pt [{}]: {}|'.format(pt_id,pt,pm.frames[pt_id].entries[pt]),
+				# print 'The newly added address in the PT[{}] at pt [{}]: {}|'.format(pt_id,pt,pm.frames[pt_id].entries[pt]),
 				# print the newly generated: PA = PM[ PM[s] + p ] + w
 				pa = pm.frames[pt_id].entries[pt] + pg
 				# print pa,
@@ -279,16 +280,16 @@ def write_vm(pm, va_outputs, st, pt, pg):
 	else:
 		pt_id = pm.frames[0].entries[st] / pm.frame_size
 		if pm.frames[pt_id].entries[pt] == 0:
-			print 'The entry of PT is 0|',
+			# print 'The entry of PT is 0|',
 			# check if there's allocatable frame for a Page
 			available_frame = pm.bitmap.first_fit_one()
-			print 'The available frame for new Page is at: {}'.format(available_frame),
+			# print 'The available frame for new Page is at: {}'.format(available_frame),
 			if available_frame:  # if so, make a new page
 				pm.frames[available_frame] = Page()
 				for i in range(pm.pg_size):  # register it in bitmap
 					pm.bitmap.occupy(available_frame+i)
 				pm.frames[pt_id].entries[pt] = available_frame*pm.frame_size
-				print 'The newly added address in the PT[{}] at pt [{}]: {}|'.format(pt_id,pt,pm.frames[pt_id].entries[pt]),
+				# print 'The newly added address in the PT[{}] at pt [{}]: {}|'.format(pt_id,pt,pm.frames[pt_id].entries[pt]),
 				# print the newly generated: PA = PM[ PM[s] + p ] + w
 				pa = pm.frames[pt_id].entries[pt] + pg
 				# print pa,
@@ -318,12 +319,96 @@ def translate_vm(pm, va_inputs):
 	pm.bitmap.print_bin()
 	return va_outputs
 
+class TLB():
+	"""
+	TLB implementation
+	"""
+	def __init__(self, size=4):
+		self.lines = []
+		for i in range(4):
+			self.lines.append([i,-2,-2,-2])
+
+	def update(self, k):
+		print 'Updating k: {}'.format(k),
+		# for i,line in enumerate(self.lines):
+		for line in self.lines:
+			if line[0] > self.lines[k][0]: #and i is not k:
+				line[0] = line[0]-1
+		self.lines[k][0] = 3
+		print 'TLB updated: {}'.format(self.lines),
+
+	def search(self, st, pt):
+			# if 
+		for k,line in enumerate(self.lines):
+			if line[1] == st:  # st match?
+				if line[2] == pt:  # pt match?
+					self.update(k)		
+					return line[3]  # found, return the f
+		return -1
+
+	def set(self,st,pt,f):
+		for line in self.lines:
+			if line[0] == 0:
+				line[0] = 3
+				line[1] = st
+				line[2] = pt
+				line[3] = f
+			else:
+				line[0] = line[0]-1
+		print 'TLB updated: {}'.format(self.lines),
+
+	def print_table(self):
+		print self.lines
 
 
-
-
-
-
+def translate_vm_tlb(pm, va_inputs):
+	va_outputs = []
+	tlb = TLB()
+	for va_input in va_inputs:
+		# print 'va_input: {}|'.format(va_input),
+		op = va_input[0]
+		va = va_input[1]
+		st, pt, pg = purse_va(va)
+		print 'st:{}, pt:{}, pg:{}-'.format(st,pt,pg).rjust(12),
+		if op == 0:
+			buf = tlb.search(st, pt)
+			if buf > -1:
+				print 'HIT!',
+				va_outputs.append('h')
+				va_outputs.append(str(buf+pg))
+			else:
+				print 'MISS.. ',
+				va_outputs.append('m')
+				read_vm(pm, va_outputs, st, pt, pg)
+				print 'VA result: {}|'.format(va_outputs[-1]),
+				if va_outputs[-1] == 'err' or va_outputs[-1] == 'pf':
+					print 'No change.'
+					continue
+				else:
+					f = int(va_outputs[-1])-pg
+					tlb.set(st,pt,f)
+		elif op == 1:
+			buf = tlb.search(st, pt)
+			if buf > -1:
+				print 'HIT!',
+				va_outputs.append('h')
+				va_outputs.append(str(buf+pg))
+			else:
+				va_outputs.append('m')
+				write_vm(pm, va_outputs, st, pt, pg)
+				print 'Now va_outputs: {}|'.format(va_outputs[-1]),
+				if va_outputs[-1] == 'err' or va_outputs[-1] == 'pf':
+					print 'No change.',
+					continue
+				else:
+					f = int(va_outputs[-1])-pg
+					tlb.set(st,pt,f)
+		else:
+			pass
+		print ''
+	# pm.bitmap.print_bin()
+	tlb.print_table()
+	return va_outputs
 
 
 

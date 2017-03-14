@@ -39,23 +39,23 @@ pm = vm.initialize_pm(st_init_pairs, pt_init_triples)
 with open(input_file2) as f:
 	lines = f.readlines()
 
-# split inputs to st input and pt input with mapping all values to ints
+# # split inputs to st input and pt input with mapping all values to ints
 va_translate = map(int, lines[0].split(' '))
 
-# print st_init
-# print pt_init
+# # print st_init
+# # print pt_init
 
-# split st input into the format of pairs 
+# # split st input into the format of pairs 
 va_translate_pairs = []
 for i in range(len(va_translate)):
 	if i%2 != 0:
 		va_translate_pairs.append((va_translate[i-1], va_translate[i]))
 
-# print va_translate_pairs
+# # print va_translate_pairs
 
 outputs = vm.translate_vm(pm, va_translate_pairs)
 
-print outputs
+# print outputs
 
 # output the result without TLB
 with open(output_file1, 'w') as f:
@@ -65,3 +65,15 @@ with open(output_file1, 'w') as f:
 		f.write(' ')
 	f.close()
 
+pm_tlb = vm.initialize_pm(st_init_pairs, pt_init_triples)
+outputs_tlb = vm.translate_vm_tlb(pm_tlb, va_translate_pairs)
+
+print outputs_tlb
+
+# # output the result with TLB
+with open(output_file2, 'w') as f:
+	# out_f = open(output_file1, 'w')
+	for output in outputs_tlb:
+		f.write(output)
+		f.write(' ')
+	f.close()
